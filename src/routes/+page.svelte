@@ -8,6 +8,7 @@ import Navbar from '$lib/components/layout/Navbar.svelte';
   import Testimonials from '$lib/components/sections/Testimonials.svelte';
   import FAQ from '$lib/components/sections/FAQ.svelte';
   import CTA from '$lib/components/sections/CTA.svelte';
+	import Buyout from '$lib/components/sections/Buyout.svelte';
   let { form }: PageProps = $props();
 </script>
 
@@ -24,6 +25,7 @@ import Navbar from '$lib/components/layout/Navbar.svelte';
   <Hero />
 <LeadForm form={form as any} />
 <Benefits />
+<Buyout/>
   <Process />
   <Testimonials />
   <FAQ />
