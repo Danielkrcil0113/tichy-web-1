@@ -1,4 +1,58 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { slide } from 'svelte/transition';
+
+  let isMenuOpen = false;
+  let activeSection = 'jak-to-funguje';
+
+  const navLinks = [
+    { label: 'Jak to funguje', href: '#jak-to-funguje', id: 'jak-to-funguje' },
+    { label: 'Výhody', href: '#vyhody', id: 'vyhody' },
+    { label: 'Poptávka', href: '#vykup-form', id: 'vykup-form' },
+    { label: 'Kontakt', href: '#kontakt', id: 'kontakt' }
+  ];
+
+  function closeMenu() {
+    isMenuOpen = false;
+  }
+
+  function handleNavClick() {
+    closeMenu();
+  }
+
+  onMount(() => {
+    if (typeof window !== 'undefined') {
+      document.documentElement.style.scrollBehavior = 'smooth';
+    }
+
+    const sections = navLinks
+      .map((link) => document.getElementById(link.id))
+      .filter(Boolean) as HTMLElement[];
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries.filter((entry) => entry.isIntersecting);
+
+        if (visibleEntries.length > 0) {
+          visibleEntries.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+          activeSection = visibleEntries[0].target.id;
+        }
+      },
+      {
+        root: null,
+        rootMargin: '-25% 0px -55% 0px',
+        threshold: [0.2, 0.35, 0.5, 0.7]
+      }
+    );
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      observer.disconnect();
+      document.documentElement.style.scrollBehavior = '';
+    };
+  });
+
   const benefits = [
     {
       title: 'Rychlé jednání',
@@ -69,16 +123,122 @@
   ];
 </script>
 
+<svelte:head>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</svelte:head>
+
+<nav class="sticky top-0 z-50 border-b border-slate-200/10 bg-slate-950/80 backdrop-blur-xl transition-all">
+  <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
+    <a
+      href="/"
+      class="flex items-center gap-3 outline-none transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+      aria-label="Zpět na hlavní stránku"
+    >
+      <img src="/logo.jpeg" alt="Odhad Nemovitosti" class="h-10 w-auto rounded-md object-contain" />
+    </a>
+
+    <div class="hidden items-center gap-3 md:flex lg:gap-8">
+      {#each navLinks as link}
+        <a
+          href={link.href}
+          class={`rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            activeSection === link.id
+              ? 'bg-indigo-500/15 text-white shadow-inner ring-1 ring-indigo-400/30'
+              : 'text-slate-300 hover:bg-white/5 hover:text-white'
+          }`}
+        >
+          {link.label}
+        </a>
+      {/each}
+
+      <div class="ml-2 flex items-center gap-3">
+        <a
+          href="/"
+          class="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
+        >
+          Zpět na hlavní stránku
+        </a>
+        <a
+          href="#vykup-form"
+          class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-lg hover:shadow-indigo-600/30"
+        >
+          Nezávazná poptávka
+        </a>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      class="rounded-xl border border-white/10 bg-white/5 p-2 text-slate-200 transition-colors hover:bg-white/10 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+      onclick={() => (isMenuOpen = !isMenuOpen)}
+      aria-label="Otevřít menu"
+      aria-expanded={isMenuOpen}
+    >
+      <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        {#if isMenuOpen}
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        {:else}
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        {/if}
+      </svg>
+    </button>
+  </div>
+
+  {#if isMenuOpen}
+    <div
+      transition:slide={{ duration: 300 }}
+      class="absolute left-0 top-full w-full border-b border-white/10 bg-slate-950/95 shadow-xl backdrop-blur-xl md:hidden"
+    >
+      <div class="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-6">
+        <div class="flex flex-col gap-1">
+          {#each navLinks as link}
+            <a
+              href={link.href}
+              class={`block rounded-lg px-3 py-3 text-base font-medium transition-colors ${
+                activeSection === link.id
+                  ? 'bg-indigo-500/15 text-white ring-1 ring-indigo-400/30'
+                  : 'text-slate-200 hover:bg-white/5 hover:text-white'
+              }`}
+              onclick={handleNavClick}
+            >
+              {link.label}
+            </a>
+          {/each}
+        </div>
+
+        <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-6">
+          <a
+            href="/"
+            class="block w-full rounded-xl border border-white/10 bg-transparent px-4 py-3.5 text-center text-sm font-bold text-slate-200 transition-colors hover:bg-white/5"
+            onclick={handleNavClick}
+          >
+            Zpět na hlavní stránku
+          </a>
+          <a
+            href="#vykup-form"
+            class="block w-full rounded-xl bg-indigo-600 px-4 py-3.5 text-center text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-colors hover:bg-indigo-500"
+            onclick={handleNavClick}
+          >
+            Nezávazná poptávka
+          </a>
+        </div>
+      </div>
+    </div>
+  {/if}
+</nav>
+
 <section id="vykup" class="relative overflow-hidden bg-slate-950 py-24 sm:py-32">
-  <!-- Background -->
   <div class="absolute inset-x-0 top-[-12rem] -z-10 transform-gpu overflow-hidden blur-3xl">
     <div class="relative left-1/2 aspect-[1155/678] w-[38rem] max-w-none -translate-x-1/2 rotate-[18deg] bg-gradient-to-tr from-indigo-500/20 via-sky-400/10 to-white/5 opacity-70 sm:w-[76rem]"></div>
   </div>
   <div class="absolute -left-20 top-20 -z-10 h-72 w-72 rounded-full bg-indigo-500/10 blur-3xl"></div>
-  <div class="absolute right-0 bottom-0 -z-10 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl"></div>
+  <div class="absolute bottom-0 right-0 -z-10 h-96 w-96 rounded-full bg-sky-500/10 blur-3xl"></div>
 
   <div class="mx-auto max-w-7xl px-6 lg:px-8">
-    <!-- Hero -->
     <div class="grid gap-10 lg:grid-cols-12 lg:items-center">
       <div class="lg:col-span-7">
         <div class="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-white/5 px-4 py-1.5 text-sm font-semibold text-indigo-300 backdrop-blur-md">
@@ -130,7 +290,6 @@
         </div>
       </div>
 
-      <!-- Right premium card -->
       <div class="lg:col-span-5">
         <div class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/20 backdrop-blur-xl">
           <div class="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-indigo-400/10 blur-3xl"></div>
@@ -174,8 +333,7 @@
       </div>
     </div>
 
-    <!-- Benefits -->
-    <div class="mt-16 grid grid-cols-1 gap-6 lg:mt-24 lg:grid-cols-3">
+    <div id="vyhody" class="mt-16 scroll-mt-28 grid grid-cols-1 gap-6 lg:mt-24 lg:grid-cols-3">
       {#each benefits as benefit}
         <article class="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-xl shadow-black/10 backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:border-indigo-400/20 hover:shadow-2xl hover:shadow-indigo-500/10">
           <div class="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-indigo-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
@@ -196,8 +354,10 @@
       {/each}
     </div>
 
-    <!-- Process -->
-    <div class="mt-16 rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-10 lg:mt-24">
+    <div
+      id="jak-to-funguje"
+      class="mt-16 scroll-mt-28 rounded-[2rem] border border-white/10 bg-white/5 p-8 shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-10 lg:mt-24"
+    >
       <div class="max-w-3xl">
         <p class="text-sm font-bold uppercase tracking-[0.22em] text-indigo-300">Jak probíhá spolupráce</p>
         <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
@@ -223,9 +383,7 @@
       </div>
     </div>
 
-    <!-- Two-column CTA + form -->
-    <div class="mt-16 grid gap-8 lg:mt-24 lg:grid-cols-12">
-      <!-- Left text block -->
+    <div id="kontakt" class="mt-16 scroll-mt-28 grid gap-8 lg:mt-24 lg:grid-cols-12">
       <div class="lg:col-span-5">
         <div class="sticky top-28 rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-900 to-slate-900/80 p-8 shadow-2xl shadow-black/20">
           <p class="text-sm font-bold uppercase tracking-[0.22em] text-indigo-300">Nezávazná poptávka</p>
@@ -262,9 +420,11 @@
         </div>
       </div>
 
-      <!-- Form -->
       <div class="lg:col-span-7">
-        <div id="vykup-form" class="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-black/10 backdrop-blur-xl">
+        <div
+          id="vykup-form"
+          class="scroll-mt-28 overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 shadow-2xl shadow-black/10 backdrop-blur-xl"
+        >
           <div class="border-b border-white/10 px-6 py-5 sm:px-8">
             <h3 class="text-2xl font-extrabold text-white">Poptávka výkupu / rychlého prodeje</h3>
             <p class="mt-2 text-sm text-slate-400">
@@ -369,7 +529,7 @@
               <label class="flex items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/40 p-4">
                 <input type="checkbox" class="mt-1 h-4 w-4 rounded border-white/20 bg-slate-900 text-indigo-500" />
                 <span class="text-sm leading-7 text-slate-400">
-                  Souhlasím se zpracováním osobních údajů za účelem zpětného kontaktování. Text si pak upravíš podle svého reálného GDPR řešení.
+                  Souhlasím se zpracováním osobních údajů za účelem zpětného kontaktování. Text si pak uprav podle svého reálného GDPR řešení.
                 </span>
               </label>
             </div>
@@ -394,7 +554,6 @@
       </div>
     </div>
 
-    <!-- Bottom CTA -->
     <div class="mt-16 rounded-[2rem] border border-white/10 bg-gradient-to-r from-indigo-600/15 via-white/5 to-sky-500/10 px-8 py-8 shadow-2xl shadow-black/10 sm:px-10 sm:py-10 lg:mt-24">
       <div class="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
         <div class="max-w-3xl">

@@ -419,6 +419,18 @@
                 class="block w-full rounded-xl border-2 {getError('full_name') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
               />
               {#if getError('full_name')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('full_name')}</p>{/if}
+              
+              {#if full_name.trim().length > 0}
+                <div in:fly={{ y: -10, duration: 300 }} class="mt-4 flex gap-4 rounded-2xl rounded-tl-none border border-indigo-100 bg-indigo-50 p-4 shadow-sm md:w-5/6 lg:w-3/4">
+                  <div class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                  </div>
+                  <div class="text-sm text-indigo-900">
+                    <p class="font-semibold mb-1">Nezávazný odhad</p>
+                    <p class="text-indigo-700/80 leading-relaxed">Tento tržní odhad je zcela nezávazný a orientační. Slouží pro vaši lepší představu o tržní ceně nemovitosti. Nelze jej využít jako oficiální znalecký posudek (např. pro banku, soud či dědické řízení).</p>
+                  </div>
+                </div>
+              {/if}
             </div>
 
             <div>

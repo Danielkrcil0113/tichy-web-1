@@ -1,16 +1,16 @@
 <script lang="ts">
   const items = [
     {
-      title: 'Reálná data z katastru',
-      text: 'Nevaříme z vody. Pracujeme s cenovými mapami a skutečnými prodejními cenami ve vašem okolí, nejen s těmi nabídkovými.'
+      title: 'Odhalíme skrytý zisk',
+      text: 'Pracujeme s přesnými daty z trhu, ze kterých náš tým dokáže vyčíst příležitosti k navýšení prodejní ceny. Známe reálné prodeje, nespokojíme se s průměrem.'
     },
     {
-      title: 'Znalost lokálního trhu',
-      text: 'Známe specifika jednotlivých lokalit, výhody vašeho okolí i plány rozvoje, které budoucí cenu nemovitosti ovlivňují.'
+      title: 'Síla týmového know-how',
+      text: 'Nespoléháme na jednotlivce. Sdílíme mezi sebou znalosti z vaší lokality, známe aktuální poptávku a plány rozvoje, které raketově zvyšují hodnotu vašeho bydlení.'
     },
     {
-      title: 'Diskrétnost a bezpečnost',
-      text: 'Odhad vás k ničemu nezavazuje. Záleží jen na vás, jak s informací o ceně naložíte. Vaše data jsou u nás vždy v bezpečí.'
+      title: 'Diskrétní a osobní přístup',
+      text: 'Získáte naše společné expertní doporučení zcela nezávazně. Záleží jen na vás, jak s vítěznou strategií naložíte. Vaše data jsou u nás v bezpečí.'
     }
   ];
 </script>
@@ -19,10 +19,10 @@
   <div class="mx-auto max-w-7xl px-6 py-20">
     <div class="max-w-2xl">
       <h2 class="text-3xl font-bold tracking-tight text-slate-900">
-        Proč si nechat zpracovat odhad od nás?
+        Proč svěřit ocenění právě našemu týmu?
       </h2>
       <p class="mt-4 text-slate-600">
-        Nespoléháme na robotické automaty. Každou nemovitost posuzuje náš zkušený specialista individuálně.
+        Nespoléháme na nepřesné algoritmy. Za každým odhadem stojí náš tým špičkových makléřů a analytiků, kteří společně pracují na tom, abyste prodali za co nejvíce.
       </p>
     </div>
 
