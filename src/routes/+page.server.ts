@@ -1,5 +1,5 @@
 import { fail } from '@sveltejs/kit';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { env } from '$env/dynamic/private';
 import type { Actions } from './$types';
 
@@ -92,6 +92,10 @@ function getPurposeLabel(purpose: string): string {
   }
 }
 
+function bufferToBase64(buffer: ArrayBuffer): string {
+  return Buffer.from(buffer).toString('base64');
+}
+
 export const actions: Actions = {
   default: async ({ request }) => {
     const data = await request.formData();
@@ -107,74 +111,46 @@ export const actions: Actions = {
     if (Object.keys(errors).length > 0) {
       return fail(422, {
         success: false,
-        message: `VALIDACE: ${JSON.stringify(errors)}`,
+        message: 'Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.',
         errors,
         values
       });
     }
 
-    const smtpHost = env.SMTP_HOST;
-    const smtpPort = Number(env.SMTP_PORT || 587);
-    const smtpUser = env.SMTP_USER;
-    const smtpPass = env.SMTP_PASS;
+    const resendApiKey = env.RESEND_API_KEY;
 
-    if (!smtpHost || !smtpUser || !smtpPass) {
+    if (!resendApiKey) {
       return fail(500, {
         success: false,
-        message: 'SMTP CONFIG ERROR: chybí SMTP_HOST, SMTP_PORT, SMTP_USER nebo SMTP_PASS',
+        message: 'Server není správně nastaven pro odesílání e-mailů.',
         errors: {},
         values
       });
     }
 
     try {
+      const resend = new Resend(resendApiKey);
+
       const attachments = await Promise.all(
         images.map(async (file) => {
           const arrayBuffer = await file.arrayBuffer();
 
           return {
             filename: file.name,
-            content: Buffer.from(arrayBuffer),
-            contentType: file.type || 'application/octet-stream'
+            content: bufferToBase64(arrayBuffer)
           };
         })
       );
 
-      const transporter = nodemailer.createTransport({
-        host: smtpHost,
-        port: smtpPort,
-        secure: smtpPort === 465,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass
-        },
-        logger: true,
-        debug: true
-      });
-
-      try {
-        await transporter.verify();
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-
-        return fail(500, {
-          success: false,
-          message: `SMTP VERIFY ERROR: ${message}`,
-          errors: {},
-          values
-        });
-      }
-
       const propertyTypeLabel = getPropertyTypeLabel(values.property_type);
       const purposeLabel = getPurposeLabel(values.purpose);
 
-      try {
-        await transporter.sendMail({
-          from: `"Odhad Nemovitosti" <${smtpUser}>`,
-          to: 'info@nejlepsiodhad.cz',
-          replyTo: values.email,
-          subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
-          text: `Nová poptávka po ocenění nemovitosti z webu:
+      const { error } = await resend.emails.send({
+        from: 'Nejlepší odhad <info@nejlepsiodhadnemovitosti.cz>',
+        to: ['info@nejlepsiodhadnemovitosti.cz'],
+        replyTo: values.email,
+        subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
+        text: `Nová poptávka po ocenění nemovitosti z webu:
 
 ZÁKLADNÍ ÚDAJE:
 Typ: ${propertyTypeLabel}
@@ -197,14 +173,13 @@ ${values.note || 'Bez poznámky'}
 SOUHLAS GDPR:
 ${values.consent ? 'Ano' : 'Ne'}
 `,
-          attachments
-        });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
+        attachments
+      });
 
+      if (error) {
         return fail(500, {
           success: false,
-          message: `SMTP SEND ERROR: ${message}`,
+          message: `Odeslání e-mailu se nezdařilo: ${error.message}`,
           errors: {},
           values
         });
@@ -215,11 +190,11 @@ ${values.consent ? 'Ano' : 'Ne'}
         message: 'Děkujeme, formulář byl úspěšně odeslán.'
       };
     } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+      const message = error instanceof Error ? error.message : 'Neznámá chyba';
 
       return fail(500, {
         success: false,
-        message: `SERVER ERROR: ${message}`,
+        message: `Odeslání e-mailu se nezdařilo: ${message}`,
         errors: {},
         values
       });

@@ -1,20 +1,20 @@
 <script lang="ts">
   const faqs = [
     {
-      q: 'Je odhad zdarma opravdu nezávazný?',
-      a: 'Ano, formulář slouží k nezávazné poptávce a prvnímu zhodnocení situace.'
+      q: 'Je odhad opravdu zdarma a nezávazný?',
+      a: 'Ano. Odhad ceny nemovitosti od nás získáte zdarma a bez jakýchkoliv závazků. Slouží jako orientační přehled o aktuální tržní hodnotě – je jen na vás, jestli se rozhodnete pokračovat dál.'
     },
     {
-      q: 'Jak rychle dostanu odpověď?',
-      a: 'Záleží na procesu klienta, ale web je připravený na rychlé zpracování leadu.'
+      q: 'Jak rychle dostanu výsledek?',
+      a: 'Ve většině případů se vám ozveme do 24 hodin. Pokud bude potřeba doplnit pár detailů, můžeme vás krátce kontaktovat a odhad upřesnit.'
     },
     {
-      q: 'Je možné přidat administraci?',
-      a: 'Ano, další krok bude napojení na Supabase a jednoduchý interní přehled leadů.'
+      q: 'Co když nemám všechny informace nebo fotky?',
+      a: 'Nevadí. Vyplňte jen to, co víte. Čím více informací zadáte (např. fotografie nebo stav nemovitosti), tím přesnější odhad vám dokážeme připravit.'
     },
     {
-      q: 'Můžeme formulář upravit podle typu nemovitosti?',
-      a: 'Ano, můžeme přidat podmíněná pole pro byty, domy, pozemky i komerční objekty.'
+      q: 'Jak přesný je tento odhad?',
+      a: 'Jedná se o orientační tržní odhad na základě dostupných dat a zkušeností. Pro běžné rozhodování (prodej, pronájem) je velmi užitečný. Pro oficiální účely (např. banka, soud) je potřeba znalecký posudek.'
     }
   ];
 </script>
@@ -26,7 +26,7 @@
         Časté dotazy
       </h2>
       <p class="mt-4 text-slate-600">
-        Důležitá sekce pro snížení nejistoty před odesláním formuláře.
+        Možná vás napadá totéž, co ostatní. Tady jsou odpovědi na nejčastější otázky před odesláním formuláře.
       </p>
     </div>
 

@@ -1,0 +1,8 @@
+PUBLIC_SUPABASE_URL=https://eurnsloeoqxdggtjdkfy.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1cm5zbG9lb3F4ZGdndGpka2Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5ODQ5MzQsImV4cCI6MjA5MTU2MDkzNH0.umHzNcAmkAX9cA1rNKzMf76xYWpEX5Ien81GPm9Tfak
+
+SMTP_HOST=mail.webglobe.cz
+SMTP_PORT=587
+SMTP_USER=info@nejlepsiodhadnemovitosti.cz
+SMTP_PASS=FAebXsb4
+MAIL_TO=info@nejlepsiodhadnemovitosti.cz
