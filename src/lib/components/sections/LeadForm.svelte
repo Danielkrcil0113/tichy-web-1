@@ -355,10 +355,22 @@
       <form method="POST" enctype="multipart/form-data" class="min-h-80" novalidate>
         <input type="hidden" name="current_step" value={step} />
 
+        <!-- TADY JE HLAVNÍ OPRAVA: tyto hidden inputy musí být vždy v DOM -->
+        <input type="hidden" name="property_type" value={property_type} />
+        <input type="hidden" name="purpose" value={purpose} />
+        <input type="hidden" name="city" value={city} />
+        <input type="hidden" name="area_m2" value={area_m2} />
+        <input type="hidden" name="disposition" value={disposition} />
+        <input type="hidden" name="condition" value={condition} />
+        <input type="hidden" name="full_name" value={full_name} />
+        <input type="hidden" name="email" value={email} />
+        <input type="hidden" name="phone" value={phone} />
+        <input type="hidden" name="note" value={note} />
+
         {#if step === 1}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="space-y-8">
             <div>
-              <label for="property_type" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">
+              <label for="property_type_step" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">
                 1. Co budeme oceňovat?
               </label>
 
@@ -392,14 +404,13 @@
                 {/each}
               </div>
 
-              <input type="hidden" id="property_type" name="property_type" value={property_type} />
               {#if getError('property_type')}
                 <p class="mt-2 text-sm font-medium text-rose-500">{getError('property_type')}</p>
               {/if}
             </div>
 
             <div>
-              <label for="purpose" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">
+              <label for="purpose_step" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">
                 2. Z jakého důvodu odhad potřebujete?
               </label>
 
@@ -423,7 +434,6 @@
                 {/each}
               </div>
 
-              <input type="hidden" id="purpose" name="purpose" value={purpose} />
               {#if getError('purpose')}
                 <p class="mt-2 text-sm font-medium text-rose-500">{getError('purpose')}</p>
               {/if}
@@ -452,8 +462,6 @@
                 }`}
               />
 
-              <input type="hidden" id="city" name="city" value={city} />
-
               {#if isAddressLoading}
                 <p class="mt-2 text-xs text-slate-500">Vyhledávám adresy...</p>
               {/if}
@@ -480,12 +488,11 @@
             </div>
 
             <div>
-              <label for="area_m2" class="mb-1.5 block text-sm font-bold text-slate-700">
+              <label for="area_m2_visible" class="mb-1.5 block text-sm font-bold text-slate-700">
                 Užitná plocha (v m²) *
               </label>
               <input
-                id="area_m2"
-                name="area_m2"
+                id="area_m2_visible"
                 type="number"
                 bind:value={area_m2}
                 placeholder="Např. 68"
@@ -499,12 +506,11 @@
             </div>
 
             <div>
-              <label for="disposition" class="mb-1.5 block text-sm font-bold text-slate-700">
+              <label for="disposition_visible" class="mb-1.5 block text-sm font-bold text-slate-700">
                 {property_type === 'pozemek' ? 'Typ pozemku' : 'Dispozice'} *
               </label>
               <select
-                id="disposition"
-                name="disposition"
+                id="disposition_visible"
                 bind:value={disposition}
                 class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
                   getError('disposition') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
@@ -523,10 +529,9 @@
             </div>
 
             <div>
-              <label for="condition" class="mb-1.5 block text-sm font-bold text-slate-700">Aktuální stav</label>
+              <label for="condition_visible" class="mb-1.5 block text-sm font-bold text-slate-700">Aktuální stav</label>
               <select
-                id="condition"
-                name="condition"
+                id="condition_visible"
                 bind:value={condition}
                 class="block w-full rounded-xl border-2 border-transparent bg-slate-100 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
               >
@@ -543,12 +548,11 @@
         {#if step === 3}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="grid gap-5 md:grid-cols-2">
             <div class="md:col-span-2">
-              <label for="full_name" class="mb-1.5 block text-sm font-bold text-slate-700">
+              <label for="full_name_visible" class="mb-1.5 block text-sm font-bold text-slate-700">
                 Vaše jméno a příjmení *
               </label>
               <input
-                id="full_name"
-                name="full_name"
+                id="full_name_visible"
                 bind:value={full_name}
                 placeholder="Např. Jan Novák"
                 class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
@@ -577,10 +581,9 @@
             </div>
 
             <div>
-              <label for="email" class="mb-1.5 block text-sm font-bold text-slate-700">E-mailová adresa *</label>
+              <label for="email_visible" class="mb-1.5 block text-sm font-bold text-slate-700">E-mailová adresa *</label>
               <input
-                id="email"
-                name="email"
+                id="email_visible"
                 type="email"
                 bind:value={email}
                 placeholder="vas@email.cz (kam zašleme odhad)"
@@ -594,10 +597,9 @@
             </div>
 
             <div>
-              <label for="phone" class="mb-1.5 block text-sm font-bold text-slate-700">Telefonní číslo *</label>
+              <label for="phone_visible" class="mb-1.5 block text-sm font-bold text-slate-700">Telefonní číslo *</label>
               <input
-                id="phone"
-                name="phone"
+                id="phone_visible"
                 bind:value={phone}
                 placeholder="+420 (pro případné doplňující dotazy)"
                 class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
@@ -674,12 +676,11 @@
             </div>
 
             <div>
-              <label for="note" class="mb-1.5 block text-sm font-bold text-slate-700">
+              <label for="note_visible" class="mb-1.5 block text-sm font-bold text-slate-700">
                 Chcete nám k nemovitosti ještě něco upřesnit?
               </label>
               <textarea
-                id="note"
-                name="note"
+                id="note_visible"
                 bind:value={note}
                 rows="4"
                 placeholder="Např. k bytu patří garáž, dům má novou střechu, pozemek je ve svahu..."
