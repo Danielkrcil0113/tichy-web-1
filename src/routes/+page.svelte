@@ -14,28 +14,24 @@
 
   let { form }: PageProps = $props();
 
-  // Svelte 5 state pro kontrolu načítání
   let isLoading = $state(true);
 
   onMount(() => {
-    // Zde simulujeme načítání (2 sekundy). 
-    // V praxi zde můžeš počkat na načtení dat nebo obrázků.
     const timer = setTimeout(() => {
       isLoading = false;
     }, 4000);
 
-    // Úklid po odmontování komponenty
     return () => clearTimeout(timer);
   });
 </script>
 
 <svelte:head>
-  
   <style>
     @keyframes sweep {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
+
     .animate-sweep {
       animation: sweep 1.5s infinite linear;
     }
@@ -48,25 +44,23 @@
     out:fade={{ duration: 800 }}
   >
     <div class="relative flex flex-col items-center px-4">
-      
       <img
         src="/logo.jpeg"
         alt="Načítání..."
-        class="h-32 md:h-48 w-auto animate-pulse object-contain drop-shadow-2xl"
+        class="h-32 w-auto animate-pulse object-contain drop-shadow-2xl md:h-48"
       />
 
-      <div class="mt-12 h-[3px] w-48 md:w-64 overflow-hidden rounded-full bg-white/10">
-        <div class="h-full w-full rounded-full bg-white/80 animate-sweep"></div>
+      <div class="mt-12 h-[3px] w-48 overflow-hidden rounded-full bg-white/10 md:w-64">
+        <div class="animate-sweep h-full w-full rounded-full bg-white/80"></div>
       </div>
-      
     </div>
   </div>
 {/if}
 
-<div class="bg-white text-slate-900 {isLoading ? 'h-screen overflow-hidden' : ''}">
+<div class={`bg-white text-slate-900 ${isLoading ? 'h-screen overflow-hidden' : ''}`}>
   <Navbar />
   <Hero />
-  <LeadForm form={form as any} />
+  <LeadForm {form} />
   <Benefits />
   <Process />
   <Testimonials />
