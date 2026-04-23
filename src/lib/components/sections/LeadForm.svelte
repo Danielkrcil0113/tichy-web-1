@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fade, fly } from 'svelte/transition';
+  import { resolve } from '$app/paths';
 
   type FormShape =
     | {
@@ -20,65 +21,42 @@
 
   let { form }: { form: FormShape } = $props();
 
-  const initial = form?.values || {};
+  function initialString(field: string, fallback = ''): string {
+    const value = form?.values?.[field];
+    return value == null ? fallback : String(value);
+  }
+
+  function initialBoolean(field: string, fallback = false): boolean {
+    const value = form?.values?.[field];
+    if (value == null) return fallback;
+    if (typeof value === 'boolean') return value;
+    return value === 'true' || value === 'on' || value === '1';
+  }
 
   let step = $state(1);
   const totalSteps = 4;
 
-  let property_type = $state(String(initial.property_type ?? 'byt'));
-  let purpose = $state(String(initial.purpose ?? 'prodej'));
-
-  // Adresa / lokalita
-  let city = $state(String(initial.city ?? ''));
-  let address_query = $state(String(initial.city ?? ''));
+  let property_type = $state(initialString('property_type', 'byt'));
+  let purpose = $state(initialString('purpose', 'prodej'));
+  let city = $state(initialString('city', ''));
+  let address_query = $state(initialString('city', ''));
   let addressSuggestions = $state<AddressSuggestion[]>([]);
   let showAddressSuggestions = $state(false);
   let isAddressLoading = $state(false);
-  let selectedAddress = $state<AddressSuggestion | null>(null);
 
-  let area_m2 = $state(String(initial.area_m2 ?? ''));
-  let disposition = $state(String(initial.disposition ?? ''));
-  let condition = $state(String(initial.condition ?? ''));
-  let full_name = $state(String(initial.full_name ?? ''));
-  let email = $state(String(initial.email ?? ''));
-  let phone = $state(String(initial.phone ?? ''));
-  let note = $state(String(initial.note ?? ''));
-  let consent = $state(Boolean(initial.consent ?? false));
+  let area_m2 = $state(initialString('area_m2', ''));
+  let disposition = $state(initialString('disposition', ''));
+  let condition = $state(initialString('condition', ''));
+  let full_name = $state(initialString('full_name', ''));
+  let email = $state(initialString('email', ''));
+  let phone = $state(initialString('phone', ''));
+  let note = $state(initialString('note', ''));
+  let consent = $state(initialBoolean('consent', false));
 
-  // --- NAHRÁVÁNÍ FOTOGRAFIÍ ---
-  let fileInput: HTMLInputElement;
+  let fileInput = $state<HTMLInputElement | null>(null);
   let selectedFiles = $state<File[]>([]);
+  let previewUrls = $state<string[]>([]);
   let fileError = $state('');
-
-  function updateNativeInput() {
-    if (!fileInput) return;
-    const dt = new DataTransfer();
-    selectedFiles.forEach((file) => dt.items.add(file));
-    fileInput.files = dt.files;
-  }
-
-  function handleFileChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (!input.files) return;
-
-    const newFiles = Array.from(input.files);
-    if (selectedFiles.length + newFiles.length > 10) {
-      fileError = 'Můžete nahrát maximálně 10 fotografií.';
-      const allowed = 10 - selectedFiles.length;
-      selectedFiles = [...selectedFiles, ...newFiles.slice(0, allowed)];
-    } else {
-      fileError = '';
-      selectedFiles = [...selectedFiles, ...newFiles];
-    }
-    updateNativeInput();
-  }
-
-  function removeFile(index: number) {
-    selectedFiles = selectedFiles.filter((_, i) => i !== index);
-    if (selectedFiles.length <= 10) fileError = '';
-    updateNativeInput();
-  }
-  // ---------------------------
 
   let localErrors = $state<Record<string, string>>({});
 
@@ -100,6 +78,74 @@
     }
   });
 
+  $effect(() => {
+    previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  });
+
+  $effect(() => {
+    if (form?.success) {
+      step = 1;
+      property_type = 'byt';
+      purpose = 'prodej';
+      city = '';
+      address_query = '';
+      addressSuggestions = [];
+      showAddressSuggestions = false;
+      isAddressLoading = false;
+      area_m2 = '';
+      disposition = '';
+      condition = '';
+      full_name = '';
+      email = '';
+      phone = '';
+      note = '';
+      consent = false;
+      selectedFiles = [];
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      previewUrls = [];
+      fileError = '';
+      localErrors = {};
+      updateNativeInput();
+    }
+  });
+
+  function updateNativeInput() {
+    if (!fileInput) return;
+    const dt = new DataTransfer();
+    selectedFiles.forEach((file) => dt.items.add(file));
+    fileInput.files = dt.files;
+  }
+
+  function handleFileChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files) return;
+
+    const newFiles = Array.from(input.files);
+    const total = selectedFiles.length + newFiles.length;
+
+    if (total > 10) {
+      const allowed = 10 - selectedFiles.length;
+      fileError = 'Můžete nahrát maximálně 10 fotografií.';
+      selectedFiles = [...selectedFiles, ...newFiles.slice(0, Math.max(allowed, 0))];
+    } else {
+      fileError = '';
+      selectedFiles = [...selectedFiles, ...newFiles];
+    }
+
+    updateNativeInput();
+  }
+
+  function removeFile(index: number) {
+    selectedFiles = selectedFiles.filter((_, i) => i !== index);
+    if (selectedFiles.length <= 10) fileError = '';
+    updateNativeInput();
+  }
+
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   async function fetchAddressSuggestions(query: string) {
@@ -114,14 +160,10 @@
     try {
       const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&countrycodes=cz&limit=5&q=${encodeURIComponent(query)}`;
       const response = await fetch(url, {
-        headers: {
-          Accept: 'application/json'
-        }
+        headers: { Accept: 'application/json' }
       });
 
-      if (!response.ok) {
-        throw new Error('Nepodařilo se načíst adresy.');
-      }
+      if (!response.ok) throw new Error('Nepodařilo se načíst adresy.');
 
       const data: AddressSuggestion[] = await response.json();
       addressSuggestions = data;
@@ -139,16 +181,15 @@
     const target = event.target as HTMLInputElement;
     address_query = target.value;
     city = target.value;
-    selectedAddress = null;
 
     if (debounceTimer) clearTimeout(debounceTimer);
+
     debounceTimer = setTimeout(() => {
       fetchAddressSuggestions(address_query);
     }, 350);
   }
 
   function selectAddress(suggestion: AddressSuggestion) {
-    selectedAddress = suggestion;
     address_query = suggestion.display_name;
     city = suggestion.display_name;
     showAddressSuggestions = false;
@@ -170,6 +211,7 @@
         localErrors.property_type = 'Vyberte typ nemovitosti.';
         isValid = false;
       }
+
       if (!purpose) {
         localErrors.purpose = 'Vyberte účel odhadu.';
         isValid = false;
@@ -179,10 +221,12 @@
         localErrors.city = 'Zadejte prosím adresu nebo lokalitu.';
         isValid = false;
       }
+
       if (!area_m2 || Number(area_m2) <= 0) {
         localErrors.area_m2 = 'Zadejte prosím platnou užitnou plochu.';
         isValid = false;
       }
+
       if (!disposition) {
         localErrors.disposition = 'Vyberte prosím možnost z nabídky.';
         isValid = false;
@@ -192,12 +236,19 @@
         localErrors.full_name = 'Zadejte prosím své jméno a příjmení.';
         isValid = false;
       }
+
       if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
         localErrors.email = 'Zadejte prosím platnou e-mailovou adresu.';
         isValid = false;
       }
+
       if (!phone || phone.trim().length < 9) {
         localErrors.phone = 'Zadejte prosím platné telefonní číslo.';
+        isValid = false;
+      }
+    } else if (currentStep === 4) {
+      if (!consent) {
+        localErrors.consent = 'Je potřeba souhlasit se zpracováním údajů.';
         isValid = false;
       }
     }
@@ -234,82 +285,126 @@
 
       <div class="mb-10 mt-8">
         <div class="flex items-center justify-between">
-          {#each Array(totalSteps) as _, i}
+          {#each Array.from({ length: totalSteps }, (_, index) => index + 1) as stepNumber (stepNumber)}
             <div class="flex flex-col items-center gap-2">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-300 {step >= i + 1 ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'}">
-                {i + 1}
+              <div
+                class={`flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold transition-colors duration-300 ${
+                  step >= stepNumber ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-400'
+                }`}
+              >
+                {stepNumber}
               </div>
             </div>
-            {#if i < totalSteps - 1}
-              <div class="mx-2 h-[2px] flex-1 transition-colors duration-300 {step > i + 1 ? 'bg-indigo-600' : 'bg-slate-100'}"></div>
+
+            {#if stepNumber < totalSteps}
+              <div
+                class={`mx-2 h-0.5 flex-1 transition-colors duration-300 ${
+                  step > stepNumber ? 'bg-indigo-600' : 'bg-slate-100'
+                }`}
+              ></div>
             {/if}
           {/each}
         </div>
+
         <div class="mt-3 flex justify-between px-1 text-xs font-medium text-slate-400">
           <span class={step >= 1 ? 'text-indigo-600' : ''}>Základ</span>
-          <span class="{step >= 2 ? 'text-indigo-600' : ''} ml-2">Detaily</span>
-          <span class="{step >= 3 ? 'text-indigo-600' : ''} mr-2">Kontakt</span>
+          <span class={`${step >= 2 ? 'text-indigo-600' : ''} ml-2`}>Detaily</span>
+          <span class={`${step >= 3 ? 'text-indigo-600' : ''} mr-2`}>Kontakt</span>
           <span class={step >= 4 ? 'text-indigo-600' : ''}>Dokončení</span>
         </div>
       </div>
 
       {#if form?.success}
         <div in:fade class="mb-8 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-emerald-800">
-          <svg class="h-6 w-6 flex-shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+          <svg class="h-6 w-6 shrink-0 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
           <span class="font-medium">Děkujeme za důvěru! Vaši poptávku jsme přijali a brzy se vám ozveme s výsledkem.</span>
         </div>
       {/if}
 
       {#if form?.message && !form?.success}
         <div in:fade class="mb-8 flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
-          <svg class="h-6 w-6 flex-shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z" /></svg>
+          <svg class="h-6 w-6 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z" />
+          </svg>
           <span class="font-medium">Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.</span>
         </div>
       {/if}
 
-      <form method="POST" enctype="multipart/form-data" class="min-h-[320px]">
+      <form method="POST" enctype="multipart/form-data" class="min-h-80" novalidate>
         {#if step === 1}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="space-y-8">
             <div>
-              <label for="property_type" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">1. Co budeme oceňovat?</label>
+              <label for="property_type" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">
+                1. Co budeme oceňovat?
+              </label>
+
               <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {#each [
-                  {id: 'byt', label: 'Byt', icon: 'M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2m-2 4h2m-2 4h2m4-8h2m-2 4h2m-2 4h2'},
-                  {id: 'dum', label: 'Dům', icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10'},
-                  {id: 'pozemek', label: 'Pozemek', icon: 'M4 4h16v16H4z M4 10h16 M10 4v16'},
-                  {id: 'komercni', label: 'Komerční', icon: 'M3 21h18M5 21V7l7-4 7 4v14M9 11h6 M9 15h6'}
-                ] as type}
+                  { id: 'byt', label: 'Byt', icon: 'M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2m-2 4h2m-2 4h2m4-8h2m-2 4h2m-2 4h2' },
+                  { id: 'dum', label: 'Dům', icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10' },
+                  { id: 'pozemek', label: 'Pozemek', icon: 'M4 4h16v16H4z M4 10h16 M10 4v16' },
+                  { id: 'komercni', label: 'Komerční', icon: 'M3 21h18M5 21V7l7-4 7 4v14M9 11h6 M9 15h6' }
+                ] as type (type.id)}
                   <button
                     type="button"
-                    onclick={() => property_type = type.id}
-                    class="group flex flex-col items-center gap-3 rounded-2xl border-2 p-4 transition-all duration-200 {property_type === type.id ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-100 bg-white text-slate-600 hover:border-indigo-200 hover:bg-slate-50'}"
+                    onclick={() => (property_type = type.id)}
+                    class={`group flex flex-col items-center gap-3 rounded-2xl border-2 p-4 transition-all duration-200 ${
+                      property_type === type.id
+                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
+                        : 'border-slate-100 bg-white text-slate-600 hover:border-indigo-200 hover:bg-slate-50'
+                    }`}
                   >
-                    <svg class="h-7 w-7 {property_type === type.id ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500'}" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <svg
+                      class={`h-7 w-7 ${property_type === type.id ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500'}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke-width="1.5"
+                      stroke="currentColor"
+                    >
                       <path stroke-linecap="round" stroke-linejoin="round" d={type.icon} />
                     </svg>
                     <span class="text-sm font-semibold">{type.label}</span>
                   </button>
                 {/each}
               </div>
+
               <input type="hidden" id="property_type" name="property_type" value={property_type} />
-              {#if getError('property_type')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('property_type')}</p>{/if}
+              {#if getError('property_type')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('property_type')}</p>
+              {/if}
             </div>
 
             <div>
-              <label for="purpose" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">2. Z jakého důvodu odhad potřebujete?</label>
+              <label for="purpose" class="mb-4 block text-sm font-bold uppercase tracking-wide text-slate-800">
+                2. Z jakého důvodu odhad potřebujete?
+              </label>
+
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                {#each [{id: 'prodej', label: 'Plánuji prodej'}, {id: 'pronajem', label: 'Chci pronajmout'}, {id: 'odhad', label: 'Jen pro zajímavost'}] as p}
+                {#each [
+                  { id: 'prodej', label: 'Plánuji prodej' },
+                  { id: 'pronajem', label: 'Chci pronajmout' },
+                  { id: 'odhad', label: 'Jen pro zajímavost' }
+                ] as p (p.id)}
                   <button
                     type="button"
-                    onclick={() => purpose = p.id}
-                    class="rounded-xl border-2 p-3 text-center text-sm font-semibold transition-all duration-200 {purpose === p.id ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm' : 'border-slate-100 bg-white text-slate-600 hover:border-indigo-200 hover:bg-slate-50'}"
+                    onclick={() => (purpose = p.id)}
+                    class={`rounded-xl border-2 p-3 text-center text-sm font-semibold transition-all duration-200 ${
+                      purpose === p.id
+                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700 shadow-sm'
+                        : 'border-slate-100 bg-white text-slate-600 hover:border-indigo-200 hover:bg-slate-50'
+                    }`}
                   >
                     {p.label}
                   </button>
                 {/each}
               </div>
+
               <input type="hidden" id="purpose" name="purpose" value={purpose} />
-              {#if getError('purpose')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('purpose')}</p>{/if}
+              {#if getError('purpose')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('purpose')}</p>
+              {/if}
             </div>
           </div>
         {/if}
@@ -317,7 +412,9 @@
         {#if step === 2}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="grid gap-5 md:grid-cols-2">
             <div class="relative md:col-span-2">
-              <label for="city_search" class="mb-1.5 block text-sm font-bold text-slate-700">Přesná adresa nebo lokalita *</label>
+              <label for="city_search" class="mb-1.5 block text-sm font-bold text-slate-700">
+                Přesná adresa nebo lokalita *
+              </label>
 
               <input
                 id="city_search"
@@ -328,7 +425,9 @@
                 onblur={hideSuggestionsLater}
                 autocomplete="off"
                 placeholder="Např. Praha 4, Chodov, Květinová 12"
-                class="block w-full rounded-xl border-2 {getError('city') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
+                class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                  getError('city') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                }`}
               />
 
               <input type="hidden" id="city" name="city" value={city} />
@@ -339,7 +438,7 @@
 
               {#if showAddressSuggestions && addressSuggestions.length > 0}
                 <div class="absolute z-20 mt-2 max-h-72 w-full overflow-auto rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
-                  {#each addressSuggestions as suggestion}
+                  {#each addressSuggestions as suggestion (suggestion.place_id)}
                     <button
                       type="button"
                       onclick={() => selectAddress(suggestion)}
@@ -353,20 +452,28 @@
                 </div>
               {/if}
 
-              {#if getError('city')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('city')}</p>{/if}
+              {#if getError('city')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('city')}</p>
+              {/if}
             </div>
 
             <div>
-              <label for="area_m2" class="mb-1.5 block text-sm font-bold text-slate-700">Užitná plocha (v m²) *</label>
+              <label for="area_m2" class="mb-1.5 block text-sm font-bold text-slate-700">
+                Užitná plocha (v m²) *
+              </label>
               <input
                 id="area_m2"
                 name="area_m2"
                 type="number"
                 bind:value={area_m2}
                 placeholder="Např. 68"
-                class="block w-full rounded-xl border-2 {getError('area_m2') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
+                class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                  getError('area_m2') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                }`}
               />
-              {#if getError('area_m2')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('area_m2')}</p>{/if}
+              {#if getError('area_m2')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('area_m2')}</p>
+              {/if}
             </div>
 
             <div>
@@ -377,16 +484,20 @@
                 id="disposition"
                 name="disposition"
                 bind:value={disposition}
-                class="block w-full rounded-xl border-2 {getError('disposition') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
+                class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                  getError('disposition') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                }`}
               >
                 <option value="">
                   {property_type === 'pozemek' ? 'Vyberte typ pozemku...' : 'Vyberte dispozici...'}
                 </option>
-                {#each getDispositionOptions() as option}
+                {#each getDispositionOptions() as option (option)}
                   <option value={option}>{option}</option>
                 {/each}
               </select>
-              {#if getError('disposition')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('disposition')}</p>{/if}
+              {#if getError('disposition')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('disposition')}</p>
+              {/if}
             </div>
 
             <div>
@@ -410,24 +521,34 @@
         {#if step === 3}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="grid gap-5 md:grid-cols-2">
             <div class="md:col-span-2">
-              <label for="full_name" class="mb-1.5 block text-sm font-bold text-slate-700">Vaše jméno a příjmení *</label>
+              <label for="full_name" class="mb-1.5 block text-sm font-bold text-slate-700">
+                Vaše jméno a příjmení *
+              </label>
               <input
                 id="full_name"
                 name="full_name"
                 bind:value={full_name}
                 placeholder="Např. Jan Novák"
-                class="block w-full rounded-xl border-2 {getError('full_name') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
+                class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                  getError('full_name') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                }`}
               />
-              {#if getError('full_name')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('full_name')}</p>{/if}
-              
+              {#if getError('full_name')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('full_name')}</p>
+              {/if}
+
               {#if full_name.trim().length > 0}
                 <div in:fly={{ y: -10, duration: 300 }} class="mt-4 flex gap-4 rounded-2xl rounded-tl-none border border-indigo-100 bg-indigo-50 p-4 shadow-sm md:w-5/6 lg:w-3/4">
                   <div class="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white shadow-sm">
-                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                    </svg>
                   </div>
                   <div class="text-sm text-indigo-900">
-                    <p class="font-semibold mb-1">Nezávazný odhad</p>
-                    <p class="text-indigo-700/80 leading-relaxed">Tento tržní odhad je zcela nezávazný a orientační. Slouží pro vaši lepší představu o tržní ceně nemovitosti. Nelze jej využít jako oficiální znalecký posudek (např. pro banku, soud či dědické řízení).</p>
+                    <p class="mb-1 font-semibold">Nezávazný odhad</p>
+                    <p class="leading-relaxed text-indigo-700/80">
+                      Tento tržní odhad je zcela nezávazný a orientační. Slouží pro vaši lepší představu o tržní ceně nemovitosti. Nelze jej využít jako oficiální znalecký posudek (např. pro banku, soud či dědické řízení).
+                    </p>
                   </div>
                 </div>
               {/if}
@@ -441,9 +562,13 @@
                 type="email"
                 bind:value={email}
                 placeholder="vas@email.cz (kam zašleme odhad)"
-                class="block w-full rounded-xl border-2 {getError('email') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
+                class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                  getError('email') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                }`}
               />
-              {#if getError('email')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('email')}</p>{/if}
+              {#if getError('email')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('email')}</p>
+              {/if}
             </div>
 
             <div>
@@ -453,9 +578,13 @@
                 name="phone"
                 bind:value={phone}
                 placeholder="+420 (pro případné doplňující dotazy)"
-                class="block w-full rounded-xl border-2 {getError('phone') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'} px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0"
+                class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                  getError('phone') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                }`}
               />
-              {#if getError('phone')}<p class="mt-2 text-sm font-medium text-rose-500">{getError('phone')}</p>{/if}
+              {#if getError('phone')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('phone')}</p>
+              {/if}
             </div>
           </div>
         {/if}
@@ -463,16 +592,29 @@
         {#if step === 4}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="space-y-6">
             <div>
-              <label class="mb-1.5 block text-sm font-bold text-slate-700">Fotografie nemovitosti (nepovinné, max 10)</label>
+              <span class="mb-1.5 block text-sm font-bold text-slate-700">
+                Fotografie nemovitosti (nepovinné, max 10)
+              </span>
+
               <div class="mt-2 flex justify-center rounded-xl border-2 border-dashed border-slate-300 px-6 py-8 transition-colors hover:bg-slate-50">
                 <div class="text-center">
                   <svg class="mx-auto h-10 w-10 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
                   </svg>
+
                   <div class="mt-4 flex justify-center text-sm leading-6 text-slate-600">
                     <label for="images" class="relative cursor-pointer rounded-md bg-transparent font-semibold text-indigo-600 focus-within:outline-none hover:text-indigo-500">
                       <span>Vybrat fotky z PC nebo mobilu</span>
-                      <input id="images" name="images" type="file" multiple accept="image/jpeg, image/png, image/webp" class="sr-only" onchange={handleFileChange} bind:this={fileInput}>
+                      <input
+                        id="images"
+                        name="images"
+                        type="file"
+                        multiple
+                        accept="image/jpeg, image/png, image/webp"
+                        class="sr-only"
+                        onchange={handleFileChange}
+                        bind:this={fileInput}
+                      />
                     </label>
                   </div>
                   <p class="mt-1 text-xs leading-5 text-slate-500">PNG, JPG, WEBP</p>
@@ -483,13 +625,24 @@
                 <p class="mt-2 text-sm font-medium text-rose-500">{fileError}</p>
               {/if}
 
+              {#if getError('images')}
+                <p class="mt-2 text-sm font-medium text-rose-500">{getError('images')}</p>
+              {/if}
+
               {#if selectedFiles.length > 0}
                 <div class="mt-4 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-5">
-                  {#each selectedFiles as file, index}
+                  {#each previewUrls as previewUrl, index (index)}
                     <div class="group relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-                      <img src={URL.createObjectURL(file)} alt="Náhled" class="h-full w-full object-cover" />
-                      <button type="button" onclick={() => removeFile(index)} class="absolute right-1.5 top-1.5 rounded-full bg-slate-900/70 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-rose-600 group-hover:opacity-100">
-                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                      <img src={previewUrl} alt="Náhled" class="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onclick={() => removeFile(index)}
+                        aria-label="Odstranit fotografii"
+                        class="absolute right-1.5 top-1.5 rounded-full bg-slate-900/70 p-1.5 text-white opacity-0 backdrop-blur-sm transition-opacity hover:bg-rose-600 group-hover:opacity-100"
+                      >
+                        <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       </button>
                     </div>
                   {/each}
@@ -499,7 +652,9 @@
             </div>
 
             <div>
-              <label for="note" class="mb-1.5 block text-sm font-bold text-slate-700">Chcete nám k nemovitosti ještě něco upřesnit?</label>
+              <label for="note" class="mb-1.5 block text-sm font-bold text-slate-700">
+                Chcete nám k nemovitosti ještě něco upřesnit?
+              </label>
               <textarea
                 id="note"
                 name="note"
@@ -510,7 +665,7 @@
               ></textarea>
             </div>
 
-            <div class="rounded-2xl bg-indigo-50/50 p-5 ring-1 {getError('consent') ? 'ring-rose-300' : 'ring-indigo-100'}">
+            <div class={`rounded-2xl bg-indigo-50/50 p-5 ${getError('consent') ? 'ring-1 ring-rose-300' : 'ring-1 ring-indigo-100'}`}>
               <div class="flex items-start gap-3">
                 <div class="flex h-6 items-center">
                   <input
@@ -522,10 +677,20 @@
                   />
                 </div>
                 <label for="consent" class="text-sm leading-6 text-slate-700">
-                  Rozumím a souhlasím se <a href="#" class="font-semibold text-indigo-600 underline decoration-indigo-200 underline-offset-2 hover:text-indigo-800">zpracováním údajů</a> pro vypracování posouzení tržní ceny. *
+                  Rozumím a souhlasím se
+                  <a
+                    href={resolve('/gdpr')}
+                    class="font-semibold text-indigo-600 underline decoration-indigo-200 underline-offset-2 hover:text-indigo-800"
+                  >
+                    zpracováním údajů
+                  </a>
+                  pro vypracování posouzení tržní ceny. *
                 </label>
               </div>
-              {#if getError('consent')}<p class="mt-2 pl-8 text-sm font-medium text-rose-500">{getError('consent')}</p>{/if}
+
+              {#if getError('consent')}
+                <p class="mt-2 pl-8 text-sm font-medium text-rose-500">{getError('consent')}</p>
+              {/if}
             </div>
           </div>
         {/if}
@@ -534,9 +699,13 @@
           <button
             type="button"
             onclick={prevStep}
-            class="flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 {step === 1 ? 'invisible' : 'visible'}"
+            class={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 transition-all hover:bg-slate-100 hover:text-slate-900 ${
+              step === 1 ? 'invisible' : 'visible'
+            }`}
           >
-            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" /></svg>
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+            </svg>
             Zpět
           </button>
 
@@ -547,7 +716,9 @@
               class="flex items-center gap-2 rounded-xl bg-slate-900 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-900/20 transition-all active:translate-y-0 hover:-translate-y-0.5 hover:bg-indigo-600 hover:shadow-indigo-600/25"
             >
               Pokračovat k dalšímu kroku
-              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" /></svg>
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+              </svg>
             </button>
           {:else}
             <button
@@ -555,7 +726,9 @@
               class="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-xl shadow-indigo-600/30 transition-all active:translate-y-0 hover:-translate-y-0.5 hover:bg-indigo-500 sm:w-auto"
             >
               Odeslat k bezplatnému ocenění
-              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+              <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
             </button>
           {/if}
         </div>

@@ -48,7 +48,8 @@
 		"vitest-browser-svelte": "^2.1.0"
 	},
 	"dependencies": {
-		"@supabase/supabase-js": "^2.103.0",
+		"@supabase/ssr": "^0.10.2",
+		"@supabase/supabase-js": "^2.104.0",
 		"nodemailer": "^8.0.5",
 		"zod": "^4.3.6"
 	}

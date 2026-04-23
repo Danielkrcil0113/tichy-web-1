@@ -1,15 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { slide } from 'svelte/transition';
+  import { resolve } from '$app/paths';
 
-  let isMenuOpen = false;
-  let activeSection = 'vykup-form';
+  let isMenuOpen = $state(false);
+  let activeSection = $state('vykup-form');
 
   const navLinks = [
-    { label: 'Výhody', href: '#vyhody', id: 'vyhody' },
-    { label: 'Postup', href: '#jak-to-funguje', id: 'jak-to-funguje' },
-    { label: 'Poptávka', href: '#vykup-form', id: 'vykup-form' }
-  ];
+    { label: 'Výhody', href: '/vykup#vyhody', id: 'vyhody' },
+    { label: 'Postup', href: '/vykup#jak-to-funguje', id: 'jak-to-funguje' },
+    { label: 'Poptávka', href: '/vykup#vykup-form', id: 'vykup-form' }
+  ] as const;
 
   function closeMenu() {
     isMenuOpen = false;
@@ -68,7 +69,7 @@
       description: 'Smlouvy, úschova i administrativa bez starostí.',
       icon: 'M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z'
     }
-  ];
+  ] as const;
 
   const steps = [
     {
@@ -86,13 +87,13 @@
       title: 'Dokončení',
       description: 'Po dohodě zajistím převod i potřebnou administrativu.'
     }
-  ];
+  ] as const;
 
   const stats = [
     { value: '24 h', label: 'první reakce' },
     { value: '100 %', label: 'diskrétnost' },
     { value: 'A–Z', label: 'servis' }
-  ];
+  ] as const;
 </script>
 
 <svelte:head>
@@ -103,10 +104,10 @@
   </style>
 </svelte:head>
 
-<nav class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl shadow-sm transition-all">
+<nav class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/80 shadow-sm backdrop-blur-xl transition-all">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
     <a
-      href="/"
+      href={resolve('/')}
       class="flex items-center gap-3 outline-none transition-transform hover:scale-[1.02] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2"
       aria-label="Zpět na hlavní stránku"
     >
@@ -118,9 +119,9 @@
     </a>
 
     <div class="hidden items-center gap-2 md:flex lg:gap-4">
-      {#each navLinks as link}
+      {#each navLinks as link (link.id)}
         <a
-          href={link.href}
+          href={resolve(link.href)}
           class={`rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
             activeSection === link.id
               ? 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200'
@@ -133,13 +134,13 @@
 
       <div class="ml-2 flex items-center gap-3">
         <a
-          href="/"
+          href={resolve('/')}
           class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
         >
           Hlavní stránka
         </a>
         <a
-          href="#vykup-form"
+          href={resolve('/vykup#vykup-form')}
           class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-md shadow-indigo-600/20 transition-all hover:-translate-y-0.5 hover:bg-indigo-500"
         >
           Nezávazná poptávka
@@ -149,7 +150,7 @@
 
     <button
       type="button"
-      class="rounded-xl border border-slate-200 bg-white p-2 text-slate-700 transition-colors hover:bg-slate-50 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      class="rounded-xl border border-slate-200 bg-white p-2 text-slate-700 transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 md:hidden"
       onclick={() => (isMenuOpen = !isMenuOpen)}
       aria-label="Otevřít menu"
       aria-expanded={isMenuOpen}
@@ -171,9 +172,9 @@
     >
       <div class="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-5 sm:px-6">
         <div class="flex flex-col gap-1">
-          {#each navLinks as link}
+          {#each navLinks as link (link.id)}
             <a
-              href={link.href}
+              href={resolve(link.href)}
               class={`block rounded-xl px-4 py-3 text-base font-medium transition-colors ${
                 activeSection === link.id
                   ? 'bg-indigo-50 text-indigo-700'
@@ -188,14 +189,14 @@
 
         <div class="mt-4 flex flex-col gap-3 border-t border-slate-200 pt-5">
           <a
-            href="/"
+            href={resolve('/')}
             class="block w-full rounded-xl border border-slate-200 px-4 py-3.5 text-center text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50"
             onclick={handleNavClick}
           >
             Hlavní stránka
           </a>
           <a
-            href="#vykup-form"
+            href={resolve('/vykup#vykup-form')}
             class="block w-full rounded-xl bg-indigo-600 px-4 py-3.5 text-center text-sm font-bold text-white transition-colors hover:bg-indigo-500"
             onclick={handleNavClick}
           >
@@ -208,14 +209,13 @@
 </nav>
 
 <section id="vykup" class="relative overflow-hidden bg-slate-950 py-14 sm:py-18">
-  <div class="absolute inset-x-0 top-[-12rem] -z-10 transform-gpu overflow-hidden blur-3xl">
+  <div class="absolute inset-x-0 -top-48 -z-10 transform-gpu overflow-hidden blur-3xl">
     <div class="relative left-1/2 aspect-[1155/678] w-[34rem] max-w-none -translate-x-1/2 rotate-[18deg] bg-gradient-to-tr from-indigo-500/20 via-sky-400/10 to-white/5 opacity-70 sm:w-[72rem]"></div>
   </div>
   <div class="absolute -left-20 top-16 -z-10 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl"></div>
   <div class="absolute bottom-0 right-0 -z-10 h-80 w-80 rounded-full bg-sky-500/10 blur-3xl"></div>
 
   <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-    <!-- HERO + FORM -->
     <div class="grid gap-8 lg:grid-cols-12 lg:items-center">
       <div class="lg:col-span-6">
         <div class="inline-flex items-center gap-2 rounded-full border border-indigo-400/20 bg-white/5 px-4 py-1.5 text-sm font-semibold text-indigo-300 backdrop-blur-md">
@@ -239,7 +239,7 @@
 
         <div class="mt-8 flex flex-col gap-3 sm:flex-row">
           <a
-            href="#vykup-form"
+            href={resolve('/vykup#vykup-form')}
             class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-7 py-3.5 text-sm font-bold text-slate-900 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-50 sm:text-base"
           >
             Nezávazně poptat výkup
@@ -257,7 +257,7 @@
         </div>
 
         <div class="mt-8 grid max-w-2xl grid-cols-3 gap-3">
-          {#each stats as stat}
+          {#each stats as stat (stat.label)}
             <div class="rounded-2xl border border-white/10 bg-white/5 p-4 text-center backdrop-blur-md">
               <p class="text-xl font-extrabold text-white sm:text-2xl">{stat.value}</p>
               <p class="mt-1 text-xs text-slate-400 sm:text-sm">{stat.label}</p>
@@ -384,9 +384,8 @@
       </div>
     </div>
 
-    <!-- VYHODY -->
     <div id="vyhody" class="mt-12 grid scroll-mt-28 grid-cols-1 gap-4 lg:mt-16 lg:grid-cols-3">
-      {#each benefits as benefit}
+      {#each benefits as benefit (benefit.title)}
         <article class="group relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/5 p-6 shadow-xl shadow-black/10 backdrop-blur-md transition-all duration-500 hover:-translate-y-2 hover:border-indigo-400/20 hover:shadow-2xl hover:shadow-indigo-500/10">
           <div class="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-indigo-500/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100"></div>
 
@@ -404,7 +403,6 @@
       {/each}
     </div>
 
-    <!-- POSTUP -->
     <div
       id="jak-to-funguje"
       class="mt-12 scroll-mt-28 rounded-[2rem] border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/10 backdrop-blur-xl sm:p-8 lg:mt-16"
@@ -417,7 +415,7 @@
       </div>
 
       <div class="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {#each steps as step}
+        {#each steps as step (step.number)}
           <div class="rounded-[1.5rem] border border-white/10 bg-slate-900/50 p-6 transition-all duration-300 hover:border-indigo-400/20 hover:bg-white/5">
             <span class="text-xs font-bold tracking-[0.25em] text-slate-500">{step.number}</span>
             <h4 class="mt-4 text-xl font-extrabold text-white">{step.title}</h4>
@@ -427,7 +425,6 @@
       </div>
     </div>
 
-    <!-- KRATKE CTA -->
     <div class="mt-12 rounded-[2rem] border border-white/10 bg-gradient-to-r from-indigo-600/15 via-white/5 to-sky-500/10 px-6 py-6 shadow-2xl shadow-black/10 sm:px-8 sm:py-8 lg:mt-16">
       <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="max-w-3xl">
@@ -441,7 +438,7 @@
 
         <div class="flex flex-col gap-3 sm:flex-row">
           <a
-            href="#vykup-form"
+            href={resolve('/vykup#vykup-form')}
             class="inline-flex items-center justify-center rounded-2xl bg-white px-7 py-3.5 text-base font-bold text-slate-900 shadow-xl shadow-black/10 transition-all duration-300 hover:-translate-y-1 hover:bg-indigo-50"
           >
             Vyplnit poptávku
