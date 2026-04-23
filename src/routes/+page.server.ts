@@ -22,11 +22,16 @@ export const actions = {
     // Získáme všechny nahrané soubory
     const images = data.getAll('images') as File[];
 
+    // OPRAVA: Vytvoříme bezpečný objekt pro návrat na frontend. 
+    // Odstraníme klíč 'images', protože SvelteKit nedokáže serializovat File objekty.
+    const safeValues = Object.fromEntries(data.entries());
+    delete safeValues.images;
+
     // 2. Základní backend validace
     if (!full_name || !email || !city || !area_m2) {
       return fail(400, {
         message: 'Chybí některé povinné údaje.',
-        values: Object.fromEntries(data) 
+        values: safeValues // Použijeme safeValues místo Object.fromEntries(data)
       });
     }
 
@@ -91,7 +96,7 @@ ${note || 'Bez poznámky'}`,
       console.error('Chyba při odesílání e-mailu:', error);
       return fail(500, {
         message: 'Omlouváme se, formulář se nepodařilo odeslat. Zkuste to prosím za chvíli.',
-        values: Object.fromEntries(data)
+        values: safeValues // Použijeme safeValues i zde
       });
     }
   }
