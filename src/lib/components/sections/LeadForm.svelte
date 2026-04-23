@@ -34,8 +34,14 @@
     return value === 'true' || value === 'on' || value === '1';
   }
 
-  let step = $state(1);
+  function initialStep(): number {
+    const value = form?.values?.current_step;
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= 1 && parsed <= 4 ? parsed : 1;
+  }
+
   const totalSteps = 4;
+  let step = $state(initialStep());
 
   let property_type = $state(initialString('property_type', 'byt'));
   let purpose = $state(initialString('purpose', 'prodej'));
@@ -82,19 +88,25 @@
     }
   });
 
-  // OPRAVA 1: Použití cleanup bloku místo ručního mazání uvnitř těla effect
   $effect(() => {
-    // Vytvoříme nové URL adresy na základě vybraných souborů
     const currentUrls = selectedFiles.map((file) => URL.createObjectURL(file));
     previewUrls = currentUrls;
 
-    // Cleanup funkce se spustí před dalším překreslením nebo při zničení komponenty
     return () => {
       currentUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   });
 
-  // OPRAVA 2: Zabalení resetu do 'untrack', aby nedocházelo k reakcím na změny v průběhu čištění
+  $effect(() => {
+    const submittedStep = Number(form?.values?.current_step);
+
+    if (!form?.success && submittedStep >= 1 && submittedStep <= totalSteps) {
+      untrack(() => {
+        step = submittedStep;
+      });
+    }
+  });
+
   $effect(() => {
     if (form?.success) {
       untrack(() => {
@@ -115,7 +127,6 @@
         note = '';
         consent = false;
         selectedFiles = [];
-        // O previewUrls se teď postará druhý $effect automaticky (nastaví se na [])
         fileError = '';
         localErrors = {};
         updateNativeInput();
@@ -276,8 +287,7 @@
   }
 
   function getError(field: string): string | undefined {
-    return localErrors[field] ||
-      (form?.errors && form.errors[field] ? form.errors[field][0] : undefined);
+    return localErrors[field] || (form?.errors && form.errors[field] ? form.errors[field][0] : undefined);
   }
 </script>
 
@@ -338,11 +348,13 @@
           <svg class="h-6 w-6 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z" />
           </svg>
-          <span class="font-medium">Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.</span>
+          <span class="font-medium">{form.message}</span>
         </div>
       {/if}
 
       <form method="POST" enctype="multipart/form-data" class="min-h-80" novalidate>
+        <input type="hidden" name="current_step" value={step} />
+
         {#if step === 1}
           <div in:fly={{ x: 20, duration: 400, delay: 100 }} class="space-y-8">
             <div>

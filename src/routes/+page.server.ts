@@ -15,6 +15,7 @@ type FormValues = {
   phone: string;
   note: string;
   consent: boolean;
+  current_step: string;
 };
 
 type FormErrors = Record<string, string[]>;
@@ -41,7 +42,8 @@ function getValues(data: FormData): FormValues {
     email: getString(data, 'email'),
     phone: getString(data, 'phone'),
     note: getString(data, 'note'),
-    consent: getBoolean(data, 'consent')
+    consent: getBoolean(data, 'consent'),
+    current_step: getString(data, 'current_step')
   };
 }
 
@@ -144,7 +146,7 @@ export const actions: Actions = {
         imageCount: images.length
       });
 
-      return fail(400, {
+      return fail(422, {
         success: false,
         message: 'Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.',
         errors,
@@ -201,7 +203,7 @@ export const actions: Actions = {
       const propertyTypeLabel = getPropertyTypeLabel(values.property_type);
       const purposeLabel = getPurposeLabel(values.purpose);
 
-      const mailOptions = {
+      await transporter.sendMail({
         from: `"Odhad Nemovitosti" <${smtpUser}>`,
         to: 'info@nejlepsiodhad.cz',
         replyTo: values.email,
@@ -230,9 +232,7 @@ SOUHLAS GDPR:
 ${values.consent ? 'Ano' : 'Ne'}
 `,
         attachments
-      };
-
-      await transporter.sendMail(mailOptions);
+      });
 
       return {
         success: true,
