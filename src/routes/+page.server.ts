@@ -140,11 +140,8 @@ export const actions: Actions = {
     const errors = validate(values, images.length);
 
     if (Object.keys(errors).length > 0) {
-      console.error('Validace formuláře selhala:', {
-        errors,
-        values,
-        imageCount: images.length
-      });
+      console.log('VALIDATION ERRORS:', errors);
+      console.log('FORM VALUES:', values);
 
       return fail(422, {
         success: false,
