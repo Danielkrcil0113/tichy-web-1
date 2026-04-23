@@ -3,101 +3,250 @@ import nodemailer from 'nodemailer';
 import { env } from '$env/dynamic/private';
 import type { Actions } from './$types';
 
-export const actions = {
+type FormValues = {
+  property_type: string;
+  purpose: string;
+  city: string;
+  area_m2: string;
+  disposition: string;
+  condition: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  note: string;
+  consent: boolean;
+};
+
+type FormErrors = Record<string, string[]>;
+
+function getString(data: FormData, key: string): string {
+  const value = data.get(key);
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function getBoolean(data: FormData, key: string): boolean {
+  const value = data.get(key);
+  return value === 'on' || value === 'true' || value === '1';
+}
+
+function getValues(data: FormData): FormValues {
+  return {
+    property_type: getString(data, 'property_type'),
+    purpose: getString(data, 'purpose'),
+    city: getString(data, 'city'),
+    area_m2: getString(data, 'area_m2'),
+    disposition: getString(data, 'disposition'),
+    condition: getString(data, 'condition'),
+    full_name: getString(data, 'full_name'),
+    email: getString(data, 'email'),
+    phone: getString(data, 'phone'),
+    note: getString(data, 'note'),
+    consent: getBoolean(data, 'consent')
+  };
+}
+
+function validate(values: FormValues, imageCount: number): FormErrors {
+  const errors: FormErrors = {};
+
+  if (!values.property_type) {
+    errors.property_type = ['Vyberte typ nemovitosti.'];
+  }
+
+  if (!values.purpose) {
+    errors.purpose = ['Vyberte účel odhadu.'];
+  }
+
+  if (!values.city || values.city.length < 3) {
+    errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
+  }
+
+  if (!values.area_m2 || Number(values.area_m2) <= 0) {
+    errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
+  }
+
+  if (!values.disposition) {
+    errors.disposition = ['Vyberte prosím možnost z nabídky.'];
+  }
+
+  if (!values.full_name || values.full_name.length < 2) {
+    errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
+  }
+
+  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) {
+    errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
+  }
+
+  if (!values.phone || values.phone.length < 9) {
+    errors.phone = ['Zadejte prosím platné telefonní číslo.'];
+  }
+
+  if (!values.consent) {
+    errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
+  }
+
+  if (imageCount > 10) {
+    errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
+  }
+
+  return errors;
+}
+
+function getPropertyTypeLabel(propertyType: string): string {
+  switch (propertyType) {
+    case 'byt':
+      return 'Byt';
+    case 'dum':
+      return 'Dům';
+    case 'pozemek':
+      return 'Pozemek';
+    case 'komercni':
+      return 'Komerční';
+    default:
+      return propertyType || 'Neuvedeno';
+  }
+}
+
+function getPurposeLabel(purpose: string): string {
+  switch (purpose) {
+    case 'prodej':
+      return 'Plánuji prodej';
+    case 'pronajem':
+      return 'Chci pronajmout';
+    case 'odhad':
+      return 'Jen pro zajímavost';
+    default:
+      return purpose || 'Neuvedeno';
+  }
+}
+
+export const actions: Actions = {
   default: async ({ request }) => {
-    // 1. Získáme data z formuláře
     const data = await request.formData();
-    
-    const property_type = data.get('property_type')?.toString();
-    const purpose = data.get('purpose')?.toString();
-    const city = data.get('city')?.toString();
-    const area_m2 = data.get('area_m2')?.toString();
-    const disposition = data.get('disposition')?.toString();
-    const condition = data.get('condition')?.toString();
-    const full_name = data.get('full_name')?.toString();
-    const email = data.get('email')?.toString();
-    const phone = data.get('phone')?.toString();
-    const note = data.get('note')?.toString();
-    
-    // Získáme všechny nahrané soubory
-    const images = data.getAll('images') as File[];
+    const values = getValues(data);
 
-    // OPRAVA: Vytvoříme bezpečný objekt pro návrat na frontend. 
-    // Odstraníme klíč 'images', protože SvelteKit nedokáže serializovat File objekty.
-    const safeValues = Object.fromEntries(data.entries());
-    delete safeValues.images;
+    const rawImages = data.getAll('images');
 
-    // 2. Základní backend validace
-    if (!full_name || !email || !city || !area_m2) {
+    const images = rawImages.filter((item): item is File => {
+      return (
+        item instanceof File &&
+        item.size > 0 &&
+        item.name !== '' &&
+        item.name !== 'undefined'
+      );
+    });
+
+    const errors = validate(values, images.length);
+
+    if (Object.keys(errors).length > 0) {
+      console.error('Validace formuláře selhala:', {
+        errors,
+        values,
+        imageCount: images.length
+      });
+
       return fail(400, {
-        message: 'Chybí některé povinné údaje.',
-        values: safeValues // Použijeme safeValues místo Object.fromEntries(data)
+        success: false,
+        message: 'Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.',
+        errors,
+        values
+      });
+    }
+
+    const smtpHost = env.SMTP_HOST;
+    const smtpPort = Number(env.SMTP_PORT || 587);
+    const smtpUser = env.SMTP_USER;
+    const smtpPass = env.SMTP_PASS;
+
+    if (!smtpHost || !smtpUser || !smtpPass) {
+      console.error('Chybí SMTP konfigurace:', {
+        SMTP_HOST: !!smtpHost,
+        SMTP_PORT: !!smtpPort,
+        SMTP_USER: !!smtpUser,
+        SMTP_PASS: !!smtpPass
+      });
+
+      return fail(500, {
+        success: false,
+        message: 'Server není správně nastaven pro odesílání e-mailů.',
+        errors: {},
+        values
       });
     }
 
     try {
-      // 3. Připrava příloh (převod z File na Buffer pro nodemailer)
       const attachments = await Promise.all(
-        images
-          .filter(file => file.size > 0 && file.name !== 'undefined' && file.name !== '')
-          .map(async (file) => ({
+        images.map(async (file) => {
+          const arrayBuffer = await file.arrayBuffer();
+
+          return {
             filename: file.name,
-            content: Buffer.from(await file.arrayBuffer()),
-            contentType: file.type
-          }))
+            content: Buffer.from(arrayBuffer),
+            contentType: file.type || 'application/octet-stream'
+          };
+        })
       );
 
-      // 4. Nastavení SMTP transportéru (přihlašovací údaje z .env)
       const transporter = nodemailer.createTransport({
-        host: env.SMTP_HOST,
-        port: Number(env.SMTP_PORT) || 465,
-        secure: true, // true pro port 465 (SSL), false pro 587 (TLS)
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpPort === 465,
         auth: {
-          user: env.SMTP_USER,
-          pass: env.SMTP_PASS
+          user: smtpUser,
+          pass: smtpPass
         }
       });
 
-      // 5. Sestavení samotného e-mailu
+      await transporter.verify();
+
+      const propertyTypeLabel = getPropertyTypeLabel(values.property_type);
+      const purposeLabel = getPurposeLabel(values.purpose);
+
       const mailOptions = {
-        from: `"Odhad Nemovitosti" <${env.SMTP_USER}>`, 
+        from: `"Odhad Nemovitosti" <${smtpUser}>`,
         to: 'info@nejlepsiodhad.cz',
-        replyTo: email,
-        subject: `Nová poptávka po odhadu: ${property_type?.toUpperCase()} - ${city}`,
+        replyTo: values.email,
+        subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
         text: `Nová poptávka po ocenění nemovitosti z webu:
 
 ZÁKLADNÍ ÚDAJE:
-Typ: ${property_type}
-Účel: ${purpose}
+Typ: ${propertyTypeLabel}
+Účel: ${purposeLabel}
 
 LOKALITA A PARAMETRY:
-Adresa: ${city}
-Užitná plocha: ${area_m2} m²
-Dispozice: ${disposition}
-Stav: ${condition || 'Neuvedeno'}
+Adresa: ${values.city}
+Užitná plocha: ${values.area_m2} m²
+Dispozice / typ: ${values.disposition}
+Stav: ${values.condition || 'Neuvedeno'}
 
 KONTAKTNÍ ÚDAJE:
-Jméno: ${full_name}
-E-mail: ${email}
-Telefon: ${phone}
+Jméno: ${values.full_name}
+E-mail: ${values.email}
+Telefon: ${values.phone}
 
 POZNÁMKA KLIENTA:
-${note || 'Bez poznámky'}`,
+${values.note || 'Bez poznámky'}
+
+SOUHLAS GDPR:
+${values.consent ? 'Ano' : 'Ne'}
+`,
         attachments
       };
 
-      // 6. Odeslání
       await transporter.sendMail(mailOptions);
 
-      // 7. Úspěšná odpověď pro frontend (zobrazí se zelený banner)
-      return { success: true };
-
+      return {
+        success: true,
+        message: 'Děkujeme, formulář byl úspěšně odeslán.'
+      };
     } catch (error) {
       console.error('Chyba při odesílání e-mailu:', error);
+
       return fail(500, {
+        success: false,
         message: 'Omlouváme se, formulář se nepodařilo odeslat. Zkuste to prosím za chvíli.',
-        values: safeValues // Použijeme safeValues i zde
+        errors: {},
+        values
       });
     }
   }
-} satisfies Actions;
+};
