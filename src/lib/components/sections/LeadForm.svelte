@@ -1,6 +1,7 @@
 <script lang="ts">
   import { fade, fly } from 'svelte/transition';
   import { resolve } from '$app/paths';
+  import { untrack } from 'svelte';
 
   type FormShape =
     | {
@@ -40,6 +41,7 @@
   let purpose = $state(initialString('purpose', 'prodej'));
   let city = $state(initialString('city', ''));
   let address_query = $state(initialString('city', ''));
+
   let addressSuggestions = $state<AddressSuggestion[]>([]);
   let showAddressSuggestions = $state(false);
   let isAddressLoading = $state(false);
@@ -74,43 +76,50 @@
   $effect(() => {
     const options = getDispositionOptions();
     if (disposition && !options.includes(disposition)) {
-      disposition = '';
+      untrack(() => {
+        disposition = '';
+      });
     }
   });
 
+  // OPRAVA 1: Použití cleanup bloku místo ručního mazání uvnitř těla effect
   $effect(() => {
-    previewUrls.forEach((url) => URL.revokeObjectURL(url));
-    previewUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+    // Vytvoříme nové URL adresy na základě vybraných souborů
+    const currentUrls = selectedFiles.map((file) => URL.createObjectURL(file));
+    previewUrls = currentUrls;
 
+    // Cleanup funkce se spustí před dalším překreslením nebo při zničení komponenty
     return () => {
-      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+      currentUrls.forEach((url) => URL.revokeObjectURL(url));
     };
   });
 
+  // OPRAVA 2: Zabalení resetu do 'untrack', aby nedocházelo k reakcím na změny v průběhu čištění
   $effect(() => {
     if (form?.success) {
-      step = 1;
-      property_type = 'byt';
-      purpose = 'prodej';
-      city = '';
-      address_query = '';
-      addressSuggestions = [];
-      showAddressSuggestions = false;
-      isAddressLoading = false;
-      area_m2 = '';
-      disposition = '';
-      condition = '';
-      full_name = '';
-      email = '';
-      phone = '';
-      note = '';
-      consent = false;
-      selectedFiles = [];
-      previewUrls.forEach((url) => URL.revokeObjectURL(url));
-      previewUrls = [];
-      fileError = '';
-      localErrors = {};
-      updateNativeInput();
+      untrack(() => {
+        step = 1;
+        property_type = 'byt';
+        purpose = 'prodej';
+        city = '';
+        address_query = '';
+        addressSuggestions = [];
+        showAddressSuggestions = false;
+        isAddressLoading = false;
+        area_m2 = '';
+        disposition = '';
+        condition = '';
+        full_name = '';
+        email = '';
+        phone = '';
+        note = '';
+        consent = false;
+        selectedFiles = [];
+        // O previewUrls se teď postará druhý $effect automaticky (nastaví se na [])
+        fileError = '';
+        localErrors = {};
+        updateNativeInput();
+      });
     }
   });
 
@@ -267,7 +276,8 @@
   }
 
   function getError(field: string): string | undefined {
-    return localErrors[field] || (form?.errors && form.errors[field] ? form.errors[field][0] : undefined);
+    return localErrors[field] ||
+      (form?.errors && form.errors[field] ? form.errors[field][0] : undefined);
   }
 </script>
 
