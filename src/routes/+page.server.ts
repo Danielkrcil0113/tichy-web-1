@@ -50,45 +50,16 @@ function getValues(data: FormData): FormValues {
 function validate(values: FormValues, imageCount: number): FormErrors {
   const errors: FormErrors = {};
 
-  if (!values.property_type) {
-    errors.property_type = ['Vyberte typ nemovitosti.'];
-  }
-
-  if (!values.purpose) {
-    errors.purpose = ['Vyberte účel odhadu.'];
-  }
-
-  if (!values.city || values.city.length < 3) {
-    errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
-  }
-
-  if (!values.area_m2 || Number(values.area_m2) <= 0) {
-    errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
-  }
-
-  if (!values.disposition) {
-    errors.disposition = ['Vyberte prosím možnost z nabídky.'];
-  }
-
-  if (!values.full_name || values.full_name.length < 2) {
-    errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
-  }
-
-  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) {
-    errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
-  }
-
-  if (!values.phone || values.phone.length < 9) {
-    errors.phone = ['Zadejte prosím platné telefonní číslo.'];
-  }
-
-  if (!values.consent) {
-    errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
-  }
-
-  if (imageCount > 10) {
-    errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
-  }
+  if (!values.property_type) errors.property_type = ['Vyberte typ nemovitosti.'];
+  if (!values.purpose) errors.purpose = ['Vyberte účel odhadu.'];
+  if (!values.city || values.city.length < 3) errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
+  if (!values.area_m2 || Number(values.area_m2) <= 0) errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
+  if (!values.disposition) errors.disposition = ['Vyberte prosím možnost z nabídky.'];
+  if (!values.full_name || values.full_name.length < 2) errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
+  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
+  if (!values.phone || values.phone.length < 9) errors.phone = ['Zadejte prosím platné telefonní číslo.'];
+  if (!values.consent) errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
+  if (imageCount > 10) errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
 
   return errors;
 }
@@ -127,25 +98,16 @@ export const actions: Actions = {
     const values = getValues(data);
 
     const rawImages = data.getAll('images');
-
     const images = rawImages.filter((item): item is File => {
-      return (
-        item instanceof File &&
-        item.size > 0 &&
-        item.name !== '' &&
-        item.name !== 'undefined'
-      );
+      return item instanceof File && item.size > 0 && item.name !== '' && item.name !== 'undefined';
     });
 
     const errors = validate(values, images.length);
 
     if (Object.keys(errors).length > 0) {
-      console.log('VALIDATION ERRORS:', errors);
-      console.log('FORM VALUES:', values);
-
       return fail(422, {
         success: false,
-        message: 'Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.',
+        message: `VALIDACE: ${JSON.stringify(errors)}`,
         errors,
         values
       });
@@ -157,16 +119,9 @@ export const actions: Actions = {
     const smtpPass = env.SMTP_PASS;
 
     if (!smtpHost || !smtpUser || !smtpPass) {
-      console.error('Chybí SMTP konfigurace:', {
-        SMTP_HOST: !!smtpHost,
-        SMTP_PORT: !!smtpPort,
-        SMTP_USER: !!smtpUser,
-        SMTP_PASS: !!smtpPass
-      });
-
       return fail(500, {
         success: false,
-        message: 'Server není správně nastaven pro odesílání e-mailů.',
+        message: 'SMTP CONFIG ERROR: chybí SMTP_HOST, SMTP_PORT, SMTP_USER nebo SMTP_PASS',
         errors: {},
         values
       });
@@ -192,20 +147,34 @@ export const actions: Actions = {
         auth: {
           user: smtpUser,
           pass: smtpPass
-        }
+        },
+        logger: true,
+        debug: true
       });
 
-      await transporter.verify();
+      try {
+        await transporter.verify();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+
+        return fail(500, {
+          success: false,
+          message: `SMTP VERIFY ERROR: ${message}`,
+          errors: {},
+          values
+        });
+      }
 
       const propertyTypeLabel = getPropertyTypeLabel(values.property_type);
       const purposeLabel = getPurposeLabel(values.purpose);
 
-      await transporter.sendMail({
-        from: `"Odhad Nemovitosti" <${smtpUser}>`,
-        to: 'info@nejlepsiodhad.cz',
-        replyTo: values.email,
-        subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
-        text: `Nová poptávka po ocenění nemovitosti z webu:
+      try {
+        await transporter.sendMail({
+          from: `"Odhad Nemovitosti" <${smtpUser}>`,
+          to: 'info@nejlepsiodhad.cz',
+          replyTo: values.email,
+          subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
+          text: `Nová poptávka po ocenění nemovitosti z webu:
 
 ZÁKLADNÍ ÚDAJE:
 Typ: ${propertyTypeLabel}
@@ -228,19 +197,29 @@ ${values.note || 'Bez poznámky'}
 SOUHLAS GDPR:
 ${values.consent ? 'Ano' : 'Ne'}
 `,
-        attachments
-      });
+          attachments
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+
+        return fail(500, {
+          success: false,
+          message: `SMTP SEND ERROR: ${message}`,
+          errors: {},
+          values
+        });
+      }
 
       return {
         success: true,
         message: 'Děkujeme, formulář byl úspěšně odeslán.'
       };
     } catch (error) {
-      console.error('Chyba při odesílání e-mailu:', error);
+      const message = error instanceof Error ? error.message : String(error);
 
       return fail(500, {
         success: false,
-        message: 'Omlouváme se, formulář se nepodařilo odeslat. Zkuste to prosím za chvíli.',
+        message: `SERVER ERROR: ${message}`,
         errors: {},
         values
       });
