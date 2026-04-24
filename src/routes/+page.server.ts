@@ -149,7 +149,7 @@ export const actions: Actions = {
         from: 'Nejlepší odhad <noreply@nejlepsiodhadnemovitosti.cz>',
       to: [
   'info@nejlepsiodhadnemovitosti.cz',
-  'danielkrci1013@gmail.com'],
+  'danielkrcil0113@gmail.com'],
 
         replyTo: values.email,
         subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
