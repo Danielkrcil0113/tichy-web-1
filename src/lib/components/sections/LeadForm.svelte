@@ -432,7 +432,6 @@
                     { id: 'byt', label: 'Byt', icon: 'M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 7h2m-2 4h2m-2 4h2m4-8h2m-2 4h2m-2 4h2' },
                     { id: 'dum', label: 'Dům', icon: 'M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10' },
                     { id: 'pozemek', label: 'Pozemek', icon: 'M4 4h16v16H4z M4 10h16 M10 4v16' },
-                    { id: 'komercni', label: 'Komerční', icon: 'M3 21h18M5 21V7l7-4 7 4v14M9 11h6 M9 15h6' }
                   ] as type (type.id)}
                     <button
                       type="button"
