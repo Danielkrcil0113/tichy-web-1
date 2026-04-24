@@ -148,7 +148,7 @@ export const actions: Actions = {
       const { error } = await resend.emails.send({
         from: 'Nejlepší odhad <noreply@nejlepsiodhadnemovitosti.cz>',
       to: [
-  'jan.tichy85@gmail.com'],
+  'info@nejlepsiodhadnemovitosti.cz'],
 
         replyTo:  ['info@nejlepsiodhadnemovitosti.cz'],
         subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
