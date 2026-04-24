@@ -62,8 +62,9 @@
   <Hero />
   <LeadForm {form} />
   <Benefits />
-  <Process />
+
   <Testimonials />
   <FAQ />
+  <Process />
   <CTA />
 </div>

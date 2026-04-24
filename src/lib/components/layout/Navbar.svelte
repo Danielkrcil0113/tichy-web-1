@@ -7,7 +7,7 @@
 
   const links = [
     { label: 'Odhad vs. online', href: '/#vyhody', hash: '#vyhody' },
-    { label: 'Upozornění k odhadu', href: '/#jak-to-funguje', hash: '#jak-to-funguje' },
+
     { label: 'Reference', href: '/#reference', hash: '#reference' },
     { label: 'FAQ', href: '/#faq', hash: '#faq' }
   ] as const;
