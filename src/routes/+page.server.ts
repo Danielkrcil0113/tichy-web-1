@@ -146,7 +146,7 @@ export const actions: Actions = {
       const purposeLabel = getPurposeLabel(values.purpose);
 
       const { error } = await resend.emails.send({
-        from: 'Nejlepší odhad <info@nejlepsiodhadnemovitosti.cz>',
+        from: 'Nejlepší odhad <	info@nejlepsiodhadnemovitosti.cz>',
         to: ['info@nejlepsiodhadnemovitosti.cz'],
         replyTo: values.email,
         subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
