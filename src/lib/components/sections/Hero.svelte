@@ -1,84 +1,299 @@
-<section class="relative overflow-hidden bg-gradient-to-b from-slate-50 via-white to-slate-50">
-  <div class="absolute inset-0 -z-10">
-    <div class="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-slate-200/40 blur-3xl"></div>
+<script lang="ts">
+  const rotatingWords = [
+    'tržní cenu',
+    'reálnou hodnotu',
+    'prodejní potenciál',
+    'správnou strategii'
+  ];
+
+  const analysisSteps = [
+    {
+      title: 'Lokalita a okolí',
+      description: 'Posuzujeme atraktivitu místa a okolí.'
+    },
+    {
+      title: 'Stav nemovitosti',
+      description: 'Bereme v úvahu dispozici, stav i potenciál.'
+    },
+    {
+      title: 'Reálné prodeje v trhu',
+      description: 'Porovnáváme s reálnými prodeji na trhu.'
+    },
+    {
+      title: 'Doporučená strategie',
+      description: 'Doporučíme cenu a další možný postup.'
+    }
+  ];
+
+  let activeWordIndex = $state(0);
+  let activeStepIndex = $state(0);
+  let progress = $state(0);
+
+  $effect(() => {
+    const wordInterval = window.setInterval(() => {
+      activeWordIndex = (activeWordIndex + 1) % rotatingWords.length;
+    }, 3600);
+
+    const stepInterval = window.setInterval(() => {
+      activeStepIndex = (activeStepIndex + 1) % analysisSteps.length;
+    }, 3200);
+
+    const progressInterval = window.setInterval(() => {
+      progress = progress >= 100 ? 0 : progress + 1;
+    }, 140);
+
+    return () => {
+      window.clearInterval(wordInterval);
+      window.clearInterval(stepInterval);
+      window.clearInterval(progressInterval);
+    };
+  });
+
+  function scrollToSection(id: string) {
+    document.querySelector(id)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+</script>
+
+<section class="relative overflow-hidden bg-slate-950 text-white">
+  <div class="absolute inset-0">
+    <div class="absolute left-1/2 top-[-20rem] h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-indigo-500/15 blur-3xl"></div>
+    <div class="absolute bottom-[-20rem] right-[-12rem] h-[34rem] w-[34rem] rounded-full bg-sky-400/10 blur-3xl"></div>
   </div>
 
-  <div class="mx-auto max-w-7xl px-6 pt-20 pb-12 md:pt-28">
-    <div class="grid items-center gap-12 lg:grid-cols-2">
-      <div>
-        <span class="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm">
-          Zcela zdarma a bez závazků
-        </span>
+  <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:90px_90px] opacity-20"></div>
 
-        <h1 class="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
-          Zjistěte maximální tržní cenu vaší nemovitosti.
-        </h1>
-
-        <p class="mt-6 max-w-xl text-lg leading-8 text-slate-600">
-          Nenechávejte při prodeji peníze na stole. Náš tým expertů pro vás na základě reálných dat z trhu zpracuje profesionální analýzu, díky které zjistíte, jak z vaší nemovitosti dostat absolutní maximum.
-        </p>
-
-        <div class="mt-8 flex flex-wrap gap-4">
-          <a
-            href="#lead-form"
-            class="rounded-2xl bg-slate-900 px-6 py-3 font-medium text-white shadow-lg shadow-slate-900/10 transition duration-300 hover:-translate-y-1 hover:bg-slate-800"
-          >
-            Chci tržní odhad zdarma
-          </a>
-
-          <a
-            href="#jak-to-funguje"
-            class="rounded-2xl border border-slate-300 bg-white px-6 py-3 font-medium text-slate-700 transition duration-300 hover:-translate-y-1 hover:bg-slate-100"
-          >
-            Jak náš tým pracuje?
-          </a>
+  <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-20 md:pb-24 md:pt-28 lg:px-8">
+    <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+      <div class="animate-hero-in">
+        <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="absolute inline-flex h-full w-full animate-slow-ping rounded-full bg-emerald-400 opacity-70"></span>
+            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+          </span>
+          Odhad zdarma a bez závazků
         </div>
 
-        <div class="mt-10 grid max-w-xl grid-cols-1 gap-4 sm:grid-cols-3">
-          <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="text-2xl font-bold text-slate-900">2 min</div>
-            <div class="mt-1 text-sm text-slate-600">rychlé zadání</div>
+        <h1 class="mt-7 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
+          Zjistěte
+          <span class="block min-h-[1.2em] bg-gradient-to-r from-indigo-300 via-sky-200 to-white bg-clip-text text-transparent sm:inline-block sm:min-w-[9.5ch]">
+            <span class="inline-block animate-word-swap">
+              {rotatingWords[activeWordIndex]}
+            </span>
+          </span>
+          své nemovitosti.
+        </h1>
+
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+          Připravíme pro vás srozumitelný odhad tržní ceny podle stavu nemovitosti,
+          lokality, aktuální poptávky a reálných prodejů v okolí.
+        </p>
+
+        <div class="mt-9 flex flex-col gap-4 sm:flex-row">
+          <button
+            type="button"
+            onclick={() => scrollToSection('#lead-form')}
+            class="group rounded-2xl bg-white px-7 py-4 text-base font-bold text-slate-950 shadow-2xl shadow-white/10 transition duration-300 hover:-translate-y-1 hover:bg-slate-100"
+          >
+            Chci odhad zdarma
+            <span class="ml-2 inline-block transition duration-300 group-hover:translate-x-1">→</span>
+          </button>
+
+          <button
+            type="button"
+            onclick={() => scrollToSection('#jak-to-funguje')}
+            class="rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/10"
+          >
+            Informace k odhadu 
+          </button>
+        </div>
+
+        <div class="mt-10 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
+          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+            <div class="text-3xl font-black text-white">2 min</div>
+            <div class="mt-1 text-sm text-slate-300">rychlé zadání</div>
           </div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="text-2xl font-bold text-slate-900">Tým</div>
-            <div class="mt-1 text-sm text-slate-600">špičkových expertů</div>
+
+          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+            <div class="text-3xl font-black text-white">900+</div>
+            <div class="mt-1 text-sm text-slate-300">zkušeností z prodejů</div>
           </div>
-          <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div class="text-2xl font-bold text-slate-900">Do 24h</div>
-            <div class="mt-1 text-sm text-slate-600">výsledek a strategie</div>
+
+          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+            <div class="text-3xl font-black text-white">0 Kč</div>
+            <div class="mt-1 text-sm text-slate-300">bez závazků</div>
           </div>
         </div>
       </div>
 
-      <div class="relative">
-        <div class="absolute -left-6 -top-6 h-24 w-24 rounded-3xl bg-slate-200/60 blur-2xl"></div>
-        <div class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/60">
-          <div class="mb-6 flex items-center justify-between">
+      <div class="relative animate-hero-card">
+        <div class="absolute -inset-6 rounded-[3rem] bg-gradient-to-tr from-indigo-500/15 via-sky-400/10 to-white/10 blur-2xl"></div>
+
+        <div class="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8">
+          <div class="mb-8 flex items-start justify-between gap-6">
             <div>
-              <p class="text-sm font-medium text-slate-500">Týmové posouzení potenciálu</p>
-              <h2 class="text-2xl font-semibold text-slate-900">Expertní analýza</h2>
+              <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">
+                Průběh odhadu
+              </p>
+              <h2 class="mt-2 text-2xl font-black text-white">
+                Co při ocenění sledujeme
+              </h2>
             </div>
-            <div class="rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">
-              online
+
+            <div class="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-sm font-bold text-emerald-300">
+              aktivní
             </div>
           </div>
 
-          <div class="space-y-4">
-            <div class="rounded-2xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
-              <span class="font-medium text-slate-900">1.</span> Zhodnocení lokality
+          <div class="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+            <div class="mb-4 flex items-center justify-between gap-4">
+              <span class="text-sm font-semibold text-slate-300">
+                Aktuálně: {analysisSteps[activeStepIndex].title}
+              </span>
+              <span class="text-sm font-bold text-indigo-300">{progress}%</span>
             </div>
-            <div class="rounded-2xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
-              <span class="font-medium text-slate-900">2.</span> Nalezení skrytého potenciálu
+
+            <div class="h-2.5 overflow-hidden rounded-full bg-white/10">
+              <div
+                class="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-300 transition-all duration-500 ease-out"
+                style={`width: ${progress}%`}
+              ></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
-              <span class="font-medium text-slate-900">3.</span> Strategie pro nejvyšší cenu
-            </div>
-            <a href="#lead-form" class="block rounded-2xl bg-slate-900 px-5 py-4 text-center font-medium text-white transition hover:bg-slate-800">
-              Získat náskok před trhem
-            </a>
           </div>
+
+          <div class="mt-6 space-y-3">
+            {#each analysisSteps as item, index (item.title)}
+              <div
+                class={`flex items-center gap-4 rounded-2xl border p-4 transition duration-700 ${
+                  index === activeStepIndex
+                    ? 'border-indigo-300/40 bg-indigo-400/10'
+                    : 'border-white/10 bg-white/5'
+                }`}
+              >
+                <div
+                  class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black transition duration-700 ${
+                    index <= activeStepIndex
+                      ? 'bg-white text-slate-950'
+                      : 'bg-white/10 text-slate-400'
+                  }`}
+                >
+                  {index + 1}
+                </div>
+
+                <div>
+                  <div class="font-semibold text-white">{item.title}</div>
+                  <p class="mt-1 text-sm leading-6 text-slate-400">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            {/each}
+          </div>
+
+          <button
+            type="button"
+            onclick={() => scrollToSection('#lead-form')}
+            class="mt-7 block w-full rounded-2xl bg-indigo-600 px-5 py-4 text-center font-bold text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:bg-indigo-500"
+          >
+            Začít odhad zdarma
+          </button>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes hero-card {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.98);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes word-swap {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+      filter: blur(4px);
+    }
+
+    15% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    85% {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(-16px);
+      filter: blur(4px);
+    }
+  }
+
+  @keyframes slow-ping {
+    0% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+
+    75%, 100% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+
+  .animate-hero-in {
+    animation: hero-in 0.8s ease forwards;
+  }
+
+  .animate-hero-card {
+    opacity: 0;
+    animation: hero-card 0.9s ease 0.15s forwards;
+  }
+
+  .animate-word-swap {
+    animation: word-swap 3.6s ease-in-out infinite;
+  }
+
+  .animate-slow-ping {
+    animation: slow-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-hero-in,
+    .animate-hero-card,
+    .animate-word-swap,
+    .animate-slow-ping {
+      animation: none;
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+</style>
