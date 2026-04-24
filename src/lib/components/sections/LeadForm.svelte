@@ -1,5 +1,5 @@
 <script lang="ts">
-import { enhance } from '$app/forms';
+  import { enhance } from '$app/forms';
   import type { SubmitFunction } from '@sveltejs/kit';
   import { resolve } from '$app/paths';
   import { fade, fly } from 'svelte/transition';
@@ -60,6 +60,7 @@ import { enhance } from '$app/forms';
   let area_m2 = $state(initialString('area_m2', ''));
   let disposition = $state(initialString('disposition', ''));
   let condition = $state(initialString('condition', ''));
+  let elevator = $state(initialString('elevator', ''));
   let full_name = $state(initialString('full_name', ''));
   let email = $state(initialString('email', ''));
   let phone = $state(initialString('phone', ''));
@@ -84,29 +85,36 @@ import { enhance } from '$app/forms';
     return dispositionOptionsByType[property_type] ?? [];
   }
 
-const handleSubmit: SubmitFunction = () => {
-  isSubmitting = true;
+  const handleSubmit: SubmitFunction = () => {
+    isSubmitting = true;
 
-  return async ({ result, update }) => {
-    isSubmitting = false;
+    return async ({ result, update }) => {
+      isSubmitting = false;
 
-    await update({ reset: false });
+      await update({ reset: false });
 
-    if (result.type === 'success') {
-      const data = result.data as FormShape;
+      if (result.type === 'success') {
+        const data = result.data as FormShape;
 
-      if (data?.success) {
-        submittedSuccess = true;
+        if (data?.success) {
+          submittedSuccess = true;
+        }
       }
-    }
+    };
   };
-};
+
   $effect(() => {
     const options = getDispositionOptions();
 
     if (disposition && !options.includes(disposition)) {
       untrack(() => {
         disposition = '';
+      });
+    }
+
+    if (property_type !== 'byt' && elevator) {
+      untrack(() => {
+        elevator = '';
       });
     }
   });
@@ -145,6 +153,7 @@ const handleSubmit: SubmitFunction = () => {
         area_m2 = '';
         disposition = '';
         condition = '';
+        elevator = '';
         full_name = '';
         email = '';
         phone = '';
@@ -276,6 +285,11 @@ const handleSubmit: SubmitFunction = () => {
         localErrors.disposition = 'Vyberte prosím možnost z nabídky.';
         isValid = false;
       }
+
+      if (property_type === 'byt' && !elevator) {
+        localErrors.elevator = 'Vyberte prosim zda-li je v domě výtah';
+        isValid = false;
+      }
     } else if (currentStep === 3) {
       if (!full_name || full_name.trim().length < 2) {
         localErrors.full_name = 'Zadejte prosím své jméno a příjmení.';
@@ -400,6 +414,7 @@ const handleSubmit: SubmitFunction = () => {
           <input type="hidden" name="area_m2" value={area_m2} />
           <input type="hidden" name="disposition" value={disposition} />
           <input type="hidden" name="condition" value={condition} />
+          <input type="hidden" name="elevator" value={elevator} />
           <input type="hidden" name="full_name" value={full_name} />
           <input type="hidden" name="email" value={email} />
           <input type="hidden" name="phone" value={phone} />
@@ -452,10 +467,9 @@ const handleSubmit: SubmitFunction = () => {
                   2. Z jakého důvodu odhad potřebujete?
                 </label>
 
-                <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {#each [
                     { id: 'prodej', label: 'Plánuji prodej' },
-                    { id: 'pronajem', label: 'Chci pronajmout' },
                     { id: 'odhad', label: 'Jen pro zajímavost' }
                   ] as p (p.id)}
                     <button
@@ -580,6 +594,30 @@ const handleSubmit: SubmitFunction = () => {
                   <option value="puvodni_stav">Původní stav (před rekonstrukcí)</option>
                 </select>
               </div>
+
+              {#if property_type === 'byt'}
+                <div>
+                  <label for="elevator_visible" class="mb-1.5 block text-sm font-bold text-slate-700">
+                    Je v domě výtah? *
+                  </label>
+                  <select
+                    id="elevator_visible"
+                    bind:value={elevator}
+                    class={`block w-full rounded-xl border-2 px-4 py-3.5 text-slate-900 transition-all hover:bg-slate-200/50 focus:border-indigo-500 focus:bg-white focus:ring-0 ${
+                      getError('elevator') ? 'border-rose-300 bg-rose-50' : 'border-transparent bg-slate-100'
+                    }`}
+                  >
+                    <option value="">Vyberte možnost...</option>
+                    <option value="ano">Ano</option>
+                    <option value="ne">Ne</option>
+                    <option value="nevim">Nevím</option>
+                  </select>
+
+                  {#if getError('elevator')}
+                    <p class="mt-2 text-sm font-medium text-rose-500">{getError('elevator')}</p>
+                  {/if}
+                </div>
+              {/if}
             </div>
           {/if}
 
