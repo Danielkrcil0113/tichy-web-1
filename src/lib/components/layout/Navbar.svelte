@@ -1,56 +1,109 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { slide } from 'svelte/transition';
 
   let isMenuOpen = $state(false);
+  let activeHash = $state('');
 
   const links = [
-    { label: 'Jak to funguje', href: '#jak-to-funguje' },
-    { label: 'Výhody', href: '#vyhody' },
-    { label: 'Reference', href: '#reference' },
-    { label: 'FAQ', href: '#faq' }
-  ];
+    { label: 'Odhad vs. online', href: '/#vyhody', hash: '#vyhody' },
+    { label: 'Upozornění k odhadu', href: '/#jak-to-funguje', hash: '#jak-to-funguje' },
+    { label: 'Reference', href: '/#reference', hash: '#reference' },
+    { label: 'FAQ', href: '/#faq', hash: '#faq' }
+  ] as const;
 
   function closeMenu() {
     isMenuOpen = false;
   }
+
+  $effect(() => {
+    const sections = links
+      .map((link) => document.querySelector(link.hash))
+      .filter(Boolean) as HTMLElement[];
+
+    function updateActiveSection() {
+      let current = '';
+
+      for (const section of sections) {
+        const rect = section.getBoundingClientRect();
+
+        if (rect.top <= 140 && rect.bottom >= 140) {
+          current = `#${section.id}`;
+          break;
+        }
+      }
+
+      activeHash = current;
+    }
+
+    updateActiveSection();
+
+    window.addEventListener('scroll', updateActiveSection, { passive: true });
+    window.addEventListener('resize', updateActiveSection);
+
+    return () => {
+      window.removeEventListener('scroll', updateActiveSection);
+      window.removeEventListener('resize', updateActiveSection);
+    };
+  });
 </script>
+
+<svelte:head>
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
+    section {
+      scroll-margin-top: 110px;
+    }
+  </style>
+</svelte:head>
 
 <nav class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl transition-all">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
-    <!-- Logo -->
     <a
-      href="/"
+      href={resolve('/')}
       class="flex items-center gap-3 rounded-2xl outline-none transition-transform duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
       aria-label="Zpět na hlavní stránku"
     >
       <img
-  src="/logo.jpeg"
-  alt="Odhad Nemovitosti"
-  class="h-14 w-auto rounded-2xl object-contain sm:h-16 shadow-md shadow-black/20"
-/>
+        src="/logo.jpeg"
+        alt="Odhad Nemovitosti"
+        class="h-14 w-auto rounded-2xl object-contain shadow-md shadow-black/20 sm:h-16"
+      />
     </a>
 
-    <!-- Desktop Menu -->
     <div class="hidden items-center gap-3 md:flex lg:gap-6">
-      {#each links as link}
+      {#each links as link (link.href)}
         <a
-          href={link.href}
-          class="rounded-xl px-4 py-2 text-sm font-medium text-slate-300 transition-all duration-200 hover:bg-white/5 hover:text-white"
+          href={resolve(link.href)}
+          class={`group relative rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            activeHash === link.hash
+              ? 'text-white'
+              : 'text-slate-300 hover:bg-white/5 hover:text-white'
+          }`}
         >
           {link.label}
+
+          <span
+            class={`absolute inset-x-4 -bottom-1 h-0.5 origin-left rounded-full bg-indigo-500 transition-transform duration-300 ${
+              activeHash === link.hash ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+            }`}
+          ></span>
         </a>
       {/each}
 
-
       <div class="ml-2 flex items-center gap-3">
         <a
-          href="/vykup"
+          href={resolve('/vykup')}
           class="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-slate-200 backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 hover:text-white"
         >
           Výkup nemovitostí
         </a>
+
         <a
-          href="#lead-form"
+          href={resolve('/#lead-form')}
           class="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/20 transition-all duration-300 hover:-translate-y-0.5 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-600/30"
         >
           Chci odhad zdarma
@@ -58,12 +111,12 @@
       </div>
     </div>
 
-    <!-- Mobile Menu Button -->
     <button
       type="button"
-      class="rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-200 transition-colors duration-200 hover:bg-white/10 md:hidden focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+      class="rounded-xl border border-white/10 bg-white/5 p-2.5 text-slate-200 transition-colors duration-200 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-950 md:hidden"
       onclick={() => (isMenuOpen = !isMenuOpen)}
-      aria-label="Otevřít menu"
+      aria-label={isMenuOpen ? 'Zavřít menu' : 'Otevřít menu'}
+      aria-expanded={isMenuOpen}
     >
       <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         {#if isMenuOpen}
@@ -75,7 +128,6 @@
     </button>
   </div>
 
-  <!-- Mobile Menu Dropdown -->
   {#if isMenuOpen}
     <div
       transition:slide={{ duration: 300 }}
@@ -83,10 +135,14 @@
     >
       <div class="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-6">
         <div class="flex flex-col gap-1">
-          {#each links as link}
+          {#each links as link (link.href)}
             <a
-              href={link.href}
-              class="block rounded-xl px-4 py-3 text-base font-medium text-slate-200 transition-colors duration-200 hover:bg-white/5 hover:text-white"
+              href={resolve(link.href)}
+              class={`rounded-xl px-4 py-3 text-base font-medium transition-colors duration-200 ${
+                activeHash === link.hash
+                  ? 'bg-white/10 text-white'
+                  : 'text-slate-200 hover:bg-white/5 hover:text-white'
+              }`}
               onclick={closeMenu}
             >
               {link.label}
@@ -96,14 +152,15 @@
 
         <div class="mt-4 flex flex-col gap-3 border-t border-white/10 pt-6">
           <a
-            href="/vykup"
+            href={resolve('/vykup')}
             class="block w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3.5 text-center text-sm font-bold text-slate-200 transition-all duration-200 hover:bg-white/10"
             onclick={closeMenu}
           >
             Výkup nemovitostí
           </a>
+
           <a
-            href="#lead-form"
+            href={resolve('/#lead-form')}
             class="block w-full rounded-xl bg-indigo-600 px-4 py-3.5 text-center text-sm font-bold text-white shadow-md shadow-indigo-600/20 transition-colors duration-200 hover:bg-indigo-500"
             onclick={closeMenu}
           >

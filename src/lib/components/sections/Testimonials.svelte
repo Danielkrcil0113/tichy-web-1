@@ -5,6 +5,8 @@
     text: string;
   }
 
+  const stars = [1, 2, 3, 4, 5];
+
   const testimonials: Testimonial[] = [
     {
       name: 'Martin Kovář',
@@ -25,7 +27,6 @@
 </script>
 
 <section id="reference" class="relative overflow-hidden bg-slate-950 py-24 sm:py-28">
-  <!-- Background -->
   <div class="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl">
     <div class="relative left-1/2 aspect-[1155/678] w-[34rem] max-w-none -translate-x-1/2 rotate-[18deg] bg-gradient-to-tr from-indigo-500/20 via-sky-400/10 to-white/5 opacity-70 sm:w-[72rem]"></div>
   </div>
@@ -51,29 +52,26 @@
     <div class="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
       {#each testimonials as item (item.name)}
         <article class="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-7 shadow-xl backdrop-blur-md transition-all hover:-translate-y-2">
-          
           <div class="relative z-10">
-            <!-- hvězdy -->
             <div class="mb-5 flex items-center gap-1 text-amber-400">
-              {#each Array(5) as _, i (i)}
+              {#each stars as star (star)}
                 <svg
                   class="h-5 w-5 -translate-y-px"
                   fill="currentColor"
                   viewBox="0 0 20 20"
+                  aria-hidden="true"
                 >
                   <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               {/each}
             </div>
 
-            <!-- text -->
             <p class="text-base leading-8 text-slate-300">
               „{item.text}“
             </p>
 
-            <!-- autor -->
             <div class="mt-8 flex items-center gap-4">
-              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500 text-white font-bold">
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500 font-bold text-white">
                 {item.name.charAt(0).toUpperCase()}
               </div>
 
@@ -83,7 +81,6 @@
               </div>
             </div>
           </div>
-
         </article>
       {/each}
     </div>
