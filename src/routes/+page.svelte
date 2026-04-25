@@ -33,8 +33,8 @@
   let showHelpBox = $state(false);
   let helpBoxClosed = $state(false);
 
-  const phoneNumber = '+420 123 456 789';
-  const phoneHref = 'tel:+420123456789';
+  const phoneNumber = '+420602447432';
+  const phoneHref = 'tel:+420 602 447 432';
 
   onMount(() => {
     // Simulace loaderu

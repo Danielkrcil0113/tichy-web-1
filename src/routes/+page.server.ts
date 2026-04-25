@@ -10,6 +10,7 @@ type FormValues = {
   area_m2: string;
   disposition: string;
   condition: string;
+  elevator: string;
   full_name: string;
   email: string;
   phone: string;
@@ -38,6 +39,7 @@ function getValues(data: FormData): FormValues {
     area_m2: getString(data, 'area_m2'),
     disposition: getString(data, 'disposition'),
     condition: getString(data, 'condition'),
+    elevator: getString(data, 'elevator'),
     full_name: getString(data, 'full_name'),
     email: getString(data, 'email'),
     phone: getString(data, 'phone'),
@@ -50,16 +52,49 @@ function getValues(data: FormData): FormValues {
 function validate(values: FormValues, imageCount: number): FormErrors {
   const errors: FormErrors = {};
 
-  if (!values.property_type) errors.property_type = ['Vyberte typ nemovitosti.'];
-  if (!values.purpose) errors.purpose = ['Vyberte účel odhadu.'];
-  if (!values.city || values.city.length < 3) errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
-  if (!values.area_m2 || Number(values.area_m2) <= 0) errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
-  if (!values.disposition) errors.disposition = ['Vyberte prosím možnost z nabídky.'];
-  if (!values.full_name || values.full_name.length < 2) errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
-  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
-  if (!values.phone || values.phone.length < 9) errors.phone = ['Zadejte prosím platné telefonní číslo.'];
-  if (!values.consent) errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
-  if (imageCount > 10) errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
+  if (!values.property_type) {
+    errors.property_type = ['Vyberte typ nemovitosti.'];
+  }
+
+  if (!values.purpose) {
+    errors.purpose = ['Vyberte účel odhadu.'];
+  }
+
+  if (!values.city || values.city.length < 3) {
+    errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
+  }
+
+  if (!values.area_m2 || Number(values.area_m2) <= 0) {
+    errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
+  }
+
+  if (!values.disposition) {
+    errors.disposition = ['Vyberte prosím možnost z nabídky.'];
+  }
+
+  if (values.property_type === 'byt' && !values.elevator) {
+    errors.elevator = ['Vyberte prosím, zda je v domě výtah.'];
+  }
+
+  if (!values.full_name || values.full_name.length < 2) {
+    errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
+  }
+
+  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) {
+    errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
+  }
+
+  if (!values.phone || values.phone.length < 9) {
+    errors.phone = ['Zadejte prosím platné telefonní číslo.'];
+  }
+
+  if (!values.consent) {
+    errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
+  }
+
+  if (imageCount > 10) {
+    errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
+  }
 
   return errors;
 }
@@ -69,7 +104,7 @@ function getPropertyTypeLabel(propertyType: string): string {
     case 'byt':
       return 'Byt';
     case 'dum':
-      return 'Dům';
+      return 'Rodinný dům';
     case 'ostatni':
       return 'Pozemek / Ostatní';
     default:
@@ -79,14 +114,46 @@ function getPropertyTypeLabel(propertyType: string): string {
 
 function getPurposeLabel(purpose: string): string {
   switch (purpose) {
-    case 'prodej':
-      return 'Plánuji prodej';
-    case 'pronajem':
-      return 'Chci pronajmout';
-    case 'odhad':
-      return 'Jen pro zajímavost';
+    case 'prodavam':
+      return 'Prodávám nemovitost';
+    case 'kupuji':
+      return 'Kupuji nemovitost';
+    case 'dedictvi':
+      return 'Dědictví';
+    case 'sjm_rozvod':
+      return 'Vypořádání SJM při rozvodu';
+    case 'jine':
+      return 'Jiný důvod';
     default:
       return purpose || 'Neuvedeno';
+  }
+}
+
+function getConditionLabel(condition: string): string {
+  switch (condition) {
+    case 'novostavba':
+      return 'Novostavba / perfektní stav';
+    case 'po_rekonstrukci':
+      return 'Po kompletní rekonstrukci';
+    case 'dobry_stav':
+      return 'Dobrý stav, udržované';
+    case 'puvodni_stav':
+      return 'Původní stav, před rekonstrukcí';
+    default:
+      return condition || 'Neuvedeno';
+  }
+}
+
+function getElevatorLabel(elevator: string): string {
+  switch (elevator) {
+    case 'ano':
+      return 'Ano';
+    case 'ne':
+      return 'Ne';
+    case 'nevim':
+      return 'Nevím';
+    default:
+      return elevator || 'Neuvedeno';
   }
 }
 
@@ -100,6 +167,7 @@ export const actions: Actions = {
     const values = getValues(data);
 
     const rawImages = data.getAll('images');
+
     const images = rawImages.filter((item): item is File => {
       return item instanceof File && item.size > 0 && item.name !== '' && item.name !== 'undefined';
     });
@@ -142,23 +210,31 @@ export const actions: Actions = {
 
       const propertyTypeLabel = getPropertyTypeLabel(values.property_type);
       const purposeLabel = getPurposeLabel(values.purpose);
+      const conditionLabel = getConditionLabel(values.condition);
+      const elevatorLabel = getElevatorLabel(values.elevator);
+
+      const elevatorText =
+        values.property_type === 'byt'
+          ? `Výtah v domě: ${elevatorLabel}`
+          : 'Výtah v domě: nerelevantní';
 
       const { error } = await resend.emails.send({
         from: 'Nejlepší odhad <noreply@nejlepsiodhadnemovitosti.cz>',
         to: ['info@nejlepsiodhadnemovitosti.cz'],
-        replyTo:  ['info@nejlepsiodhadnemovitosti.cz'],
+        replyTo: values.email || 'info@nejlepsiodhadnemovitosti.cz',
         subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
         text: `Nová poptávka po ocenění nemovitosti z webu:
 
 ZÁKLADNÍ ÚDAJE:
-Typ: ${propertyTypeLabel}
-Účel: ${purposeLabel}
+Typ nemovitosti: ${propertyTypeLabel}
+Účel odhadu: ${purposeLabel}
 
 LOKALITA A PARAMETRY:
-Adresa: ${values.city}
+Adresa / lokalita: ${values.city}
 Užitná plocha: ${values.area_m2} m²
 Dispozice / typ: ${values.disposition}
-Stav: ${values.condition || 'Neuvedeno'}
+Stav: ${conditionLabel}
+${elevatorText}
 
 KONTAKTNÍ ÚDAJE:
 Jméno: ${values.full_name}
@@ -167,6 +243,9 @@ Telefon: ${values.phone}
 
 POZNÁMKA KLIENTA:
 ${values.note || 'Bez poznámky'}
+
+FOTOGRAFIE:
+Počet přiložených fotografií: ${images.length}
 
 SOUHLAS GDPR:
 ${values.consent ? 'Ano' : 'Ne'}
