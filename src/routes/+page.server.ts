@@ -70,10 +70,8 @@ function getPropertyTypeLabel(propertyType: string): string {
       return 'Byt';
     case 'dum':
       return 'Dům';
-    case 'pozemek':
-      return 'Pozemek';
-    case 'komercni':
-      return 'Komerční';
+    case 'ostatni':
+      return 'Pozemek / Ostatní';
     default:
       return propertyType || 'Neuvedeno';
   }
@@ -147,9 +145,7 @@ export const actions: Actions = {
 
       const { error } = await resend.emails.send({
         from: 'Nejlepší odhad <noreply@nejlepsiodhadnemovitosti.cz>',
-      to: [
-  'info@nejlepsiodhadnemovitosti.cz'],
-
+        to: ['info@nejlepsiodhadnemovitosti.cz'],
         replyTo:  ['info@nejlepsiodhadnemovitosti.cz'],
         subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
         text: `Nová poptávka po ocenění nemovitosti z webu:

@@ -7,12 +7,27 @@
   import Hero from '$lib/components/sections/Hero.svelte';
   import Benefits from '$lib/components/sections/Benefits.svelte';
   import Process from '$lib/components/sections/Process.svelte';
-  import LeadForm from '$lib/components/sections/LeadForm.svelte';
   import Testimonials from '$lib/components/sections/Testimonials.svelte';
   import FAQ from '$lib/components/sections/FAQ.svelte';
   import CTA from '$lib/components/sections/CTA.svelte';
+  import LeadWidget from '$lib/components/sections/LeadWidget.svelte';
 
-  let { form }: PageProps = $props();
+  // Definujeme rozhraní pro data z formuláře
+  interface FormResult {
+    success?: boolean;
+    message?: string;
+    errors?: Record<string, string[]>;
+    values?: Record<string, string | number | boolean | null | undefined>;
+  }
+
+  // Definujeme přesnější typ pro PageData, abychom se vyhnuli 'any' u data.form
+  interface CustomPageData {
+    form?: FormResult;
+    [key: string]: unknown;
+  }
+
+  // Rozšíříme PageProps o naše upravené datové struktury
+  let { data, form }: { data: CustomPageData & PageProps['data'], form?: FormResult } = $props();
 
   let isLoading = $state(true);
   let showHelpBox = $state(false);
@@ -22,9 +37,10 @@
   const phoneHref = 'tel:+420123456789';
 
   onMount(() => {
+    // Simulace loaderu
     const timer = setTimeout(() => {
       isLoading = false;
-    }, 4000);
+    }, 2500);
 
     const handleScroll = () => {
       if (window.scrollY > 500 && !helpBoxClosed) {
@@ -33,7 +49,6 @@
     };
 
     window.addEventListener('scroll', handleScroll);
-
     return () => {
       clearTimeout(timer);
       window.removeEventListener('scroll', handleScroll);
@@ -47,12 +62,12 @@
 </script>
 
 <svelte:head>
+  <title>Nejlepší Odhad | Odhad nemovitosti zdarma</title>
   <style>
     @keyframes sweep {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(100%); }
     }
-
     .animate-sweep {
       animation: sweep 1.5s infinite linear;
     }
@@ -61,17 +76,16 @@
 
 {#if isLoading}
   <div
-    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#11223A]"
-    out:fade={{ duration: 800 }}
+    class="fixed inset-0 z-100 flex flex-col items-center justify-center bg-[#11223A]"
+    out:fade={{ duration: 600 }}
   >
     <div class="relative flex flex-col items-center px-4">
       <img
         src="/logo.jpeg"
-        alt="Načítání..."
+        alt="Logo"
         class="h-32 w-auto animate-pulse object-contain drop-shadow-2xl md:h-48"
       />
-
-      <div class="mt-12 h-[3px] w-48 overflow-hidden rounded-full bg-white/10 md:w-64">
+      <div class="mt-12 h-0.75 w-48 overflow-hidden rounded-full bg-white/10 md:w-64">
         <div class="animate-sweep h-full w-full rounded-full bg-white/80"></div>
       </div>
     </div>
@@ -81,9 +95,11 @@
 <div class={`bg-white text-slate-900 ${isLoading ? 'h-screen overflow-hidden' : ''}`}>
   <Navbar />
   <Hero />
-  <LeadForm {form} />
+  
+  <!-- LeadWidget nyní dostává form buď z akce (form) nebo z loadu (data.form) bez varování ESLintu -->
+  <LeadWidget form={form || data.form} />
+  
   <Benefits />
-
   <Testimonials />
   <FAQ />
   <Process />
@@ -99,8 +115,8 @@
     <button
       type="button"
       class="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-slate-900"
-      aria-label="Zavřít"
-      on:click={closeHelpBox}
+      aria-label="Zavřít nápovědu"
+      onclick={closeHelpBox}
     >
       ×
     </button>
@@ -108,11 +124,7 @@
     <div class="pr-8">
       <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-lg">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 0 0-1.173.417l-.97 1.293a1.125 1.125 0 0 1-1.21.38 12.035 12.035 0 0 1-7.143-7.143 1.125 1.125 0 0 1 .38-1.21l1.293-.97a1.125 1.125 0 0 0 .417-1.173L6.963 3.102A1.125 1.125 0 0 0 5.872 2.25H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
-          />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 0 0-1.173.417l-.97 1.293a1.125 1.125 0 0 1-1.21.38 12.035 12.035 0 0 1-7.143-7.143 1.125 1.125 0 0 1 .38-1.21l1.293-.97a1.125 1.125 0 0 0 .417-1.173L6.963 3.102A1.125 1.125 0 0 0 5.872 2.25H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
         </svg>
       </div>
 
