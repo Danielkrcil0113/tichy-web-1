@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { env } from '$env/dynamic/private';
 import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 import { createClient } from '@supabase/supabase-js';
+import { dev } from '$app/environment';
 import type { Actions } from './$types';
 
 type FormValues = {
@@ -69,49 +70,17 @@ function getValues(data: FormData): FormValues {
 function validate(values: FormValues, imageCount: number): FormErrors {
   const errors: FormErrors = {};
 
-  if (!values.property_type) {
-    errors.property_type = ['Vyberte typ nemovitosti.'];
-  }
-
-  if (!values.purpose) {
-    errors.purpose = ['Vyberte účel odhadu.'];
-  }
-
-  if (!values.city || values.city.length < 3) {
-    errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
-  }
-
-  if (!values.area_m2 || Number(values.area_m2) <= 0) {
-    errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
-  }
-
-  if (!values.disposition) {
-    errors.disposition = ['Vyberte prosím možnost z nabídky.'];
-  }
-
-  if (values.property_type === 'byt' && !values.elevator) {
-    errors.elevator = ['Vyberte prosím, zda je v domě výtah.'];
-  }
-
-  if (!values.full_name || values.full_name.length < 2) {
-    errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
-  }
-
-  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) {
-    errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
-  }
-
-  if (!values.phone || values.phone.length < 9) {
-    errors.phone = ['Zadejte prosím platné telefonní číslo.'];
-  }
-
-  if (!values.consent) {
-    errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
-  }
-
-  if (imageCount > 10) {
-    errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
-  }
+  if (!values.property_type) errors.property_type = ['Vyberte typ nemovitosti.'];
+  if (!values.purpose) errors.purpose = ['Vyberte účel odhadu.'];
+  if (!values.city || values.city.length < 3) errors.city = ['Zadejte prosím adresu nebo lokalitu.'];
+  if (!values.area_m2 || Number(values.area_m2) <= 0) errors.area_m2 = ['Zadejte prosím platnou užitnou plochu.'];
+  if (!values.disposition) errors.disposition = ['Vyberte prosím možnost z nabídky.'];
+  if (values.property_type === 'byt' && !values.elevator) errors.elevator = ['Vyberte prosím, zda je v domě výtah.'];
+  if (!values.full_name || values.full_name.length < 2) errors.full_name = ['Zadejte prosím své jméno a příjmení.'];
+  if (!values.email || !/^\S+@\S+\.\S+$/.test(values.email)) errors.email = ['Zadejte prosím platnou e-mailovou adresu.'];
+  if (!values.phone || values.phone.length < 9) errors.phone = ['Zadejte prosím platné telefonní číslo.'];
+  if (!values.consent) errors.consent = ['Je potřeba souhlasit se zpracováním údajů.'];
+  if (imageCount > 10) errors.images = ['Můžete nahrát maximálně 10 fotografií.'];
 
   return errors;
 }
@@ -363,6 +332,13 @@ export const actions: Actions = {
     const errors = validate(values, images.length);
 
     if (Object.keys(errors).length > 0) {
+      if (dev) {
+        console.log('FORM VALUES:', values);
+        console.log('FORM ERRORS:', errors);
+        console.log('IMAGE COUNT:', images.length);
+        console.log('RAW FORM DATA:', Object.fromEntries(data.entries()));
+      }
+
       return fail(422, {
         success: false,
         message: 'Některá políčka je potřeba ještě upravit. Zkontrolujte prosím formulář.',
