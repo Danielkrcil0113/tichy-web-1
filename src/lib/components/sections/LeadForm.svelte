@@ -70,6 +70,16 @@
   let fileError = $state('');
 
   let localErrors = $state<Record<string, string>>({});
+  let formTopElement = $state<HTMLElement | null>(null);
+
+  function scrollFormToTop() {
+    window.setTimeout(() => {
+      formTopElement?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 60);
+  }
 
   const purposeOptions = [
     {
@@ -177,6 +187,7 @@
 
   const handleSubmit: SubmitFunction = ({ cancel }) => {
     if (!validateStep(step)) {
+      scrollFormToTop();
       cancel();
       return;
     }
@@ -192,6 +203,7 @@
 
         if (data?.success) {
           localSuccess = true;
+          scrollFormToTop();
         }
       }
 
@@ -203,6 +215,8 @@
             Object.entries(data.errors).map(([key, value]) => [key, value[0]])
           );
         }
+
+        scrollFormToTop();
       }
     };
   };
@@ -280,12 +294,16 @@
   function nextStep() {
     if (validateStep(step) && step < totalSteps) {
       step += 1;
+      scrollFormToTop();
+    } else {
+      scrollFormToTop();
     }
   }
 
   function prevStep() {
     if (step > 1) {
       step -= 1;
+      scrollFormToTop();
     }
   }
 
@@ -300,7 +318,10 @@
   };
 </script>
 
-<div class="relative overflow-hidden rounded-4xl bg-white p-6 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-100 sm:p-12">
+<div
+  bind:this={formTopElement}
+  class="relative scroll-mt-28 overflow-hidden rounded-4xl bg-white p-6 shadow-2xl shadow-slate-200/50 ring-1 ring-slate-100 sm:p-12"
+>
   {#if submittedSuccess}
     <div
       in:fade
@@ -319,6 +340,14 @@
       <p class="mt-3 max-w-xl leading-7 text-slate-600">
         Děkujeme za důvěru. Vaše údaje jsme přijali a brzy se vám ozveme s dalším postupem.
       </p>
+
+      <button
+        type="button"
+        onclick={onBack}
+        class="mt-7 rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:bg-indigo-500"
+      >
+        Zadat další odhad
+      </button>
     </div>
   {:else}
     <div class="mb-8 flex items-center justify-between border-b border-slate-100 pb-5">

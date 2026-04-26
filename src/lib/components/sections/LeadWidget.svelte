@@ -1,13 +1,19 @@
 <script lang="ts">
   import { fade, fly } from 'svelte/transition';
-  import { untrack } from 'svelte';
+  import { onMount, untrack } from 'svelte';
   import LeadForm from './LeadForm.svelte';
 
   let { form } = $props();
 
+  let ignoreServerForm = $state(false);
+
+  let activeForm = $derived(ignoreServerForm ? null : form);
+
   let selectedType = $state<string | null>(
     untrack(() => (form?.values?.property_type ? String(form.values.property_type) : null))
   );
+
+  let sectionElement = $state<HTMLElement | null>(null);
 
   const propertyTypes = [
     {
@@ -39,28 +45,58 @@
     }
   ];
 
+  function scrollToLeadStart() {
+    window.setTimeout(() => {
+      sectionElement?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 60);
+  }
+
   function selectType(type: string) {
+    ignoreServerForm = true;
     selectedType = type;
+    scrollToLeadStart();
   }
 
   function handleReset() {
+    ignoreServerForm = true;
     selectedType = null;
-
-    if (form) {
-      form.errors = undefined;
-      form.message = undefined;
-    }
+    scrollToLeadStart();
   }
+
+  function startNewEstimate() {
+    ignoreServerForm = true;
+    selectedType = null;
+    scrollToLeadStart();
+  }
+
+  onMount(() => {
+    window.addEventListener('start-new-estimate', startNewEstimate);
+
+    if (form?.success) {
+      scrollToLeadStart();
+    }
+
+    return () => {
+      window.removeEventListener('start-new-estimate', startNewEstimate);
+    };
+  });
 </script>
 
-<section id="lead-form" class="relative overflow-hidden bg-slate-50 py-16 sm:py-24 lg:py-32">
+<section
+  id="lead-form"
+  bind:this={sectionElement}
+  class="relative overflow-hidden bg-slate-50 py-16 scroll-mt-28 sm:py-24 lg:py-32"
+>
   <div class="pointer-events-none absolute inset-0">
     <div class="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-200/30 blur-3xl"></div>
     <div class="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-slate-300/30 blur-3xl"></div>
   </div>
 
   <div class="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-    {#if !selectedType && !form?.success}
+    {#if !selectedType && !activeForm?.success}
       <div in:fade={{ duration: 400 }} class="mx-auto mb-10 max-w-3xl text-center sm:mb-12">
         <span class="inline-flex items-center rounded-full bg-indigo-50 px-4 py-2 text-xs font-bold uppercase tracking-wide text-indigo-700 ring-1 ring-indigo-100 sm:text-sm">
           Odhad nemovitosti zdarma
@@ -169,13 +205,17 @@
       </div>
 
       <div class="fixed bottom-4 left-0 right-0 z-10 px-4 md:hidden">
-        <div class="rounded-2xl bg-white/90 p-3 text-center text-sm font-semibold text-slate-600 shadow-lg ring-1 ring-slate-200 backdrop-blur">
-          Vyberte typ nemovitosti 👆
-        </div>
+        <button
+          type="button"
+          onclick={scrollToLeadStart}
+          class="w-full rounded-2xl bg-indigo-600 p-3 text-center text-sm font-bold text-white shadow-xl shadow-indigo-600/25 ring-1 ring-indigo-500 backdrop-blur transition active:scale-[0.98]"
+        >
+          Chci odhad zdarma
+        </button>
       </div>
     {:else}
       <div in:fade={{ duration: 400, delay: 100 }}>
-        <LeadForm {form} property_type={selectedType || 'byt'} onBack={handleReset} />
+        <LeadForm form={activeForm} property_type={selectedType || 'byt'} onBack={handleReset} />
       </div>
     {/if}
   </div>
