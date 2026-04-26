@@ -189,6 +189,7 @@
 
       if (result.type === 'success') {
         const data = result.data as FormShape;
+
         if (data?.success) {
           localSuccess = true;
         }
@@ -365,35 +366,36 @@
       </div>
     </div>
 
-  {#if form?.message && !form?.success}
-  <div in:fade class="mb-8 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
-    <div class="flex gap-3">
-      <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z"
-        />
-      </svg>
+    {#if form?.message && !form?.success}
+      <div in:fade class="mb-8 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
+        <div class="flex gap-3">
+          <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z"
+            />
+          </svg>
 
-      <div>
-        <p class="font-bold">{form.message}</p>
+          <div>
+            <p class="font-bold">{form.message}</p>
 
-        {#if form?.errors}
-          <ul class="mt-3 list-disc space-y-1 pl-5 text-sm font-medium">
-            {#each Object.values(form.errors).flat() as error, index (`${error}-${index}`)}
-              <li>{error}</li>
-            {/each}
-          </ul>
-        {/if}
+            {#if form?.errors}
+              <ul class="mt-3 list-disc space-y-1 pl-5 text-sm font-medium">
+                {#each Object.values(form.errors).flat() as error, index (`${error}-${index}`)}
+                  <li>{error}</li>
+                {/each}
+              </ul>
+            {/if}
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-{/if}
+    {/if}
 
     <form method="POST" enctype="multipart/form-data" class="min-h-80" novalidate use:enhance={handleSubmit}>
       <input type="hidden" name="current_step" value={step} />
       <input type="hidden" name="property_type" value={property_type} />
+      <input type="hidden" name="purpose" value={purpose} />
       <input type="hidden" name="city" value={city} />
       <input type="hidden" name="area_m2" value={area_m2} />
       <input type="hidden" name="disposition" value={disposition} />
@@ -430,8 +432,6 @@
                 </button>
               {/each}
             </div>
-
-            <input type="hidden" name="purpose" value={purpose} />
 
             {#if getError('purpose')}
               <p class="mt-2 text-sm font-medium text-rose-500">{getError('purpose')}</p>
