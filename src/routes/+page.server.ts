@@ -381,23 +381,24 @@ export const actions: Actions = {
     const { data: lead, error: leadError } = await supabaseAdmin
       .from('leads')
       .insert({
-        property_type: values.property_type,
-        purpose: values.purpose,
-        city: values.city,
-        area_m2: values.area_m2,
-        disposition: values.disposition,
-        condition: values.condition || null,
-        elevator: values.elevator || null,
-        full_name: values.full_name,
-        email: values.email,
-        phone: values.phone,
-        note: values.note || null,
-        consent: values.consent,
-        image_count: images.length,
-        admin_email_sent: false,
-        customer_email_sent: false,
-        email_error: null
-      })
+  lead_type: 'valuation',
+  property_type: values.property_type,
+  purpose: values.purpose,
+  city: values.city,
+  area_m2: values.area_m2,
+  disposition: values.disposition,
+  condition: values.condition || null,
+  elevator: values.elevator || null,
+  full_name: values.full_name,
+  email: values.email,
+  phone: values.phone,
+  note: values.note || null,
+  consent: values.consent,
+  image_count: images.length,
+  admin_email_sent: false,
+  customer_email_sent: false,
+  email_error: null
+})
       .select('id')
       .single();
 
