@@ -32,25 +32,68 @@
 
   const phoneNumber = '+420 602 447 432';
   const phoneHref = 'tel:+420602447432';
+  const availabilityText = 'Po–Pá 9:00–18:00';
 
   onMount(() => {
-    const timer = setTimeout(() => {
-      isLoading = false;
-    }, 2500);
+  let idleTimer: number | undefined;
 
-    const handleScroll = () => {
-      if (window.scrollY > 500 && !helpBoxClosed) {
-        showHelpBox = true;
-      }
-    };
+  const showHelp = () => {
+    if (!helpBoxClosed && !isLoading) {
+      showHelpBox = true;
+    }
+  };
 
-    window.addEventListener('scroll', handleScroll);
+  const resetIdleTimer = () => {
+    if (idleTimer) {
+      window.clearTimeout(idleTimer);
+    }
 
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('scroll', handleScroll);
-    };
-  });
+    idleTimer = window.setTimeout(() => {
+      showHelp();
+    }, 60000);
+  };
+
+  const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    const viewportHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+
+    const scrollProgress = (scrollTop + viewportHeight) / documentHeight;
+
+    if (scrollProgress >= 0.75) {
+      showHelp();
+    }
+
+    resetIdleTimer();
+  };
+
+  const handleUserActivity = () => {
+    resetIdleTimer();
+  };
+
+  const loadingTimer = window.setTimeout(() => {
+    isLoading = false;
+    resetIdleTimer();
+  }, 2500);
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('click', handleUserActivity);
+  window.addEventListener('keydown', handleUserActivity);
+  window.addEventListener('touchstart', handleUserActivity, { passive: true });
+
+  return () => {
+    window.clearTimeout(loadingTimer);
+
+    if (idleTimer) {
+      window.clearTimeout(idleTimer);
+    }
+
+    window.removeEventListener('scroll', handleScroll);
+    window.removeEventListener('click', handleUserActivity);
+    window.removeEventListener('keydown', handleUserActivity);
+    window.removeEventListener('touchstart', handleUserActivity);
+  };
+});
 
   function closeHelpBox() {
     helpBoxClosed = true;
@@ -219,22 +262,22 @@
                 <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70"></span>
                 <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
               </span>
-              Jsme na příjmu
+              Telefonická pomoc
             </div>
 
             <p class="mt-2 text-xs font-black uppercase tracking-widest text-slate-400">
-              Rychlá pomoc
+              {availabilityText}
             </p>
           </div>
         </div>
 
         <h3 class="mt-5 text-2xl font-black tracking-tight text-slate-950">
-          Nejste si jistí?
+          Potřebujete poradit?
         </h3>
 
         <p class="mt-3 text-sm leading-6 text-slate-600">
           Rádi vám pomůžeme s odhadem, výběrem typu nemovitosti i dalším postupem.
-          Stačí nám zavolat.
+          Zavolejte nám v pracovní době.
         </p>
 
         <a
@@ -245,7 +288,7 @@
 
           <span>
             <span class="block text-xs font-bold uppercase tracking-widest text-white/60">
-              Zavolat nyní
+              Zavolat Po–Pá 9–18
             </span>
             <span class="mt-0.5 block text-base font-black">
               {phoneNumber}
