@@ -24,11 +24,17 @@ type FormValues = {
 
 type FormErrors = Record<string, string[]>;
 
-const supabaseAdmin = createClient(PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY ?? '', {
-  auth: {
-    persistSession: false
+function getSupabaseAdmin() {
+  if (!PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing Supabase env variables.');
   }
-});
+
+  return createClient(PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      persistSession: false
+    }
+  });
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -350,7 +356,7 @@ export const actions: Actions = {
     if (!env.RESEND_API_KEY) {
       return fail(500, {
         success: false,
-        message: 'Server není správně nastaven pro odesílání e-mailů.',
+        message: 'Server není správně nastaven pro odesílání e-mailů. Chybí RESEND_API_KEY.',
         errors: {},
         values
       });
@@ -359,11 +365,13 @@ export const actions: Actions = {
     if (!env.SUPABASE_SERVICE_ROLE_KEY) {
       return fail(500, {
         success: false,
-        message: 'Server není správně nastaven pro ukládání poptávek.',
+        message: 'Server není správně nastaven pro ukládání poptávek. Chybí SUPABASE_SERVICE_ROLE_KEY.',
         errors: {},
         values
       });
     }
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     const propertyTypeLabel = getPropertyTypeLabel(values.property_type);
     const purposeLabel = getPurposeLabel(values.purpose);

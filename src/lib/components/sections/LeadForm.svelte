@@ -121,7 +121,66 @@
     return 'U pozemku doporučujeme přiložit fotky celého pozemku, příjezdové cesty, okolí, hranic pozemku, terénu a případných inženýrských sítí.';
   }
 
-  const handleSubmit: SubmitFunction = () => {
+  function validateStep(currentStep: number): boolean {
+    localErrors = {};
+    let isValid = true;
+
+    if (currentStep === 1) {
+      if (!purpose) {
+        localErrors.purpose = 'Vyberte účel odhadu.';
+        isValid = false;
+      }
+    } else if (currentStep === 2) {
+      if (!city || city.trim().length < 3) {
+        localErrors.city = 'Zadejte prosím adresu nebo lokalitu.';
+        isValid = false;
+      }
+
+      if (!area_m2 || Number(area_m2) <= 0) {
+        localErrors.area_m2 = 'Zadejte prosím platnou užitnou plochu.';
+        isValid = false;
+      }
+
+      if (!disposition) {
+        localErrors.disposition = 'Vyberte prosím možnost z nabídky.';
+        isValid = false;
+      }
+
+      if (property_type === 'byt' && !elevator) {
+        localErrors.elevator = 'Vyberte prosím, zda je v domě výtah.';
+        isValid = false;
+      }
+    } else if (currentStep === 3) {
+      if (!full_name || full_name.trim().length < 2) {
+        localErrors.full_name = 'Zadejte prosím své jméno a příjmení.';
+        isValid = false;
+      }
+
+      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+        localErrors.email = 'Zadejte prosím platnou e-mailovou adresu.';
+        isValid = false;
+      }
+
+      if (!phone || phone.trim().length < 9) {
+        localErrors.phone = 'Zadejte prosím platné telefonní číslo.';
+        isValid = false;
+      }
+    } else if (currentStep === 4) {
+      if (!consent) {
+        localErrors.consent = 'Je potřeba souhlasit se zpracováním údajů.';
+        isValid = false;
+      }
+    }
+
+    return isValid;
+  }
+
+  const handleSubmit: SubmitFunction = ({ cancel }) => {
+    if (!validateStep(step)) {
+      cancel();
+      return;
+    }
+
     isSubmitting = true;
 
     return async ({ result, update }) => {
@@ -130,7 +189,19 @@
 
       if (result.type === 'success') {
         const data = result.data as FormShape;
-        if (data?.success) localSuccess = true;
+        if (data?.success) {
+          localSuccess = true;
+        }
+      }
+
+      if (result.type === 'failure') {
+        const data = result.data as FormShape;
+
+        if (data?.errors) {
+          localErrors = Object.fromEntries(
+            Object.entries(data.errors).map(([key, value]) => [key, value[0]])
+          );
+        }
       }
     };
   };
@@ -203,60 +274,6 @@
     }
 
     updateNativeInput();
-  }
-
-  function validateStep(currentStep: number): boolean {
-    localErrors = {};
-    let isValid = true;
-
-    if (currentStep === 1) {
-      if (!purpose) {
-        localErrors.purpose = 'Vyberte účel odhadu.';
-        isValid = false;
-      }
-    } else if (currentStep === 2) {
-      if (!city || city.trim().length < 3) {
-        localErrors.city = 'Zadejte prosím adresu nebo lokalitu.';
-        isValid = false;
-      }
-
-      if (!area_m2 || Number(area_m2) <= 0) {
-        localErrors.area_m2 = 'Zadejte prosím platnou užitnou plochu.';
-        isValid = false;
-      }
-
-      if (!disposition) {
-        localErrors.disposition = 'Vyberte prosím možnost z nabídky.';
-        isValid = false;
-      }
-
-      if (property_type === 'byt' && !elevator) {
-        localErrors.elevator = 'Vyberte prosím, zda je v domě výtah.';
-        isValid = false;
-      }
-    } else if (currentStep === 3) {
-      if (!full_name || full_name.trim().length < 2) {
-        localErrors.full_name = 'Zadejte prosím své jméno a příjmení.';
-        isValid = false;
-      }
-
-      if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-        localErrors.email = 'Zadejte prosím platnou e-mailovou adresu.';
-        isValid = false;
-      }
-
-      if (!phone || phone.trim().length < 9) {
-        localErrors.phone = 'Zadejte prosím platné telefonní číslo.';
-        isValid = false;
-      }
-    } else if (currentStep === 4) {
-      if (!consent) {
-        localErrors.consent = 'Je potřeba souhlasit se zpracováním údajů.';
-        isValid = false;
-      }
-    }
-
-    return isValid;
   }
 
   function nextStep() {
@@ -348,19 +365,31 @@
       </div>
     </div>
 
-    {#if form?.message && !form?.success}
-      <div in:fade class="mb-8 flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
-        <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z"
-          />
-        </svg>
+  {#if form?.message && !form?.success}
+  <div in:fade class="mb-8 rounded-2xl border border-rose-200 bg-rose-50 p-5 text-rose-700">
+    <div class="flex gap-3">
+      <svg class="mt-0.5 h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3Z"
+        />
+      </svg>
 
-        <span class="font-medium">{form.message}</span>
+      <div>
+        <p class="font-bold">{form.message}</p>
+
+        {#if form?.errors}
+          <ul class="mt-3 list-disc space-y-1 pl-5 text-sm font-medium">
+            {#each Object.values(form.errors).flat() as error, index (`${error}-${index}`)}
+              <li>{error}</li>
+            {/each}
+          </ul>
+        {/if}
       </div>
-    {/if}
+    </div>
+  </div>
+{/if}
 
     <form method="POST" enctype="multipart/form-data" class="min-h-80" novalidate use:enhance={handleSubmit}>
       <input type="hidden" name="current_step" value={step} />
