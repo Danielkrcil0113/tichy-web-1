@@ -1,10 +1,27 @@
 import { error, fail, redirect } from '@sveltejs/kit';
+import { env } from '$env/dynamic/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { createClient } from '@supabase/supabase-js';
 import type { Actions, ServerLoad } from '@sveltejs/kit';
 
 const ALLOWED_STATUSES = ['new', 'contacted', 'in_progress', 'done', 'archived'];
 
-export const load: ServerLoad = async ({ locals, params }) => {
-  const { data: lead, error: dbError } = await locals.supabase
+function getSupabaseAdmin() {
+  if (!PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error('Missing Supabase env variables.');
+  }
+
+  return createClient(PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: {
+      persistSession: false
+    }
+  });
+}
+
+export const load: ServerLoad = async ({ params }) => {
+  const supabaseAdmin = getSupabaseAdmin();
+
+  const { data: lead, error: dbError } = await supabaseAdmin
     .from('leads')
     .select('*')
     .eq('id', params.id)
@@ -18,7 +35,9 @@ export const load: ServerLoad = async ({ locals, params }) => {
 };
 
 export const actions: Actions = {
-  updateLead: async ({ request, locals, params }) => {
+  updateLead: async ({ request, params }) => {
+    const supabaseAdmin = getSupabaseAdmin();
+
     const formData = await request.formData();
 
     const status = String(formData.get('status') ?? '');
@@ -26,11 +45,12 @@ export const actions: Actions = {
 
     if (!ALLOWED_STATUSES.includes(status)) {
       return fail(400, {
+        success: false,
         message: 'Neplatný stav.'
       });
     }
 
-    const { error: updateError } = await locals.supabase
+    const { error: updateError } = await supabaseAdmin
       .from('leads')
       .update({
         status,
@@ -40,7 +60,8 @@ export const actions: Actions = {
 
     if (updateError) {
       return fail(500, {
-        message: 'Změny se nepodařilo uložit.'
+        success: false,
+        message: `Změny se nepodařilo uložit: ${updateError.message}`
       });
     }
 
@@ -50,15 +71,18 @@ export const actions: Actions = {
     };
   },
 
-  deleteLead: async ({ locals, params }) => {
-    const { error: deleteError } = await locals.supabase
+  deleteLead: async ({ params }) => {
+    const supabaseAdmin = getSupabaseAdmin();
+
+    const { error: deleteError } = await supabaseAdmin
       .from('leads')
       .delete()
       .eq('id', params.id);
 
     if (deleteError) {
       return fail(500, {
-        message: 'Lead se nepodařilo smazat.'
+        success: false,
+        message: `Lead se nepodařilo smazat: ${deleteError.message}`
       });
     }
 
