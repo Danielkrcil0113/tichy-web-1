@@ -6,7 +6,6 @@
   let activeHash = $state('');
 
   const links = [
-    { label: 'Odhad vs. online', href: '/#vyhody', hash: '#vyhody' },
 
     { label: 'Reference', href: '/#reference', hash: '#reference' },
     { label: 'FAQ', href: '/#faq', hash: '#faq' }
