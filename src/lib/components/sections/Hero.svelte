@@ -4,7 +4,7 @@
   const analysisSteps = [
     { title: 'Lokalita a okolí', description: 'Posuzujeme atraktivitu místa a okolí.' },
     { title: 'Stav nemovitosti', description: 'Bereme v úvahu dispozici, stav i potenciál.' },
-    { title: 'Reálné prodeje v trhu', description: 'Porovnáváme s reálnými prodeji na trhu.' },
+    { title: 'Prodej dle katastru', description: 'Porovnáváme s reálnými prodeji na trhu.' },
     { title: 'Doporučená strategie', description: 'Doporučíme cenu a další možný postup.' }
   ];
 
@@ -50,28 +50,32 @@
 
   <div class="relative mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 md:pb-24 md:pt-28 lg:px-8">
     <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
-      <div class="animate-hero-in">
-        <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-100 backdrop-blur">
-          <span class="relative flex h-2.5 w-2.5">
+      <div class="animate-hero-in text-center sm:text-left">
+        <div class="inline-flex max-w-full items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-100 shadow-lg shadow-black/10 backdrop-blur">
+          <span class="relative flex h-2.5 w-2.5 shrink-0">
             <span class="absolute inline-flex h-full w-full animate-slow-ping rounded-full bg-emerald-400 opacity-70"></span>
             <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
           </span>
-          Odhad zdarma a bez závazků
+          <span class="truncate">Odhad zdarma a bez závazků</span>
         </div>
 
-        <h1 class="mt-7 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
-          Zjistěte
-          <span class="word-wrapper block min-h-[1.2em] sm:inline-block sm:min-w-[9.5ch]">
-            {#key activeWordIndex}
-              <span class="word-animated">
-                {rotatingWords[activeWordIndex]}
-              </span>
-            {/key}
+        <h1 class="mx-auto mt-7 max-w-4xl text-balance text-4xl font-black tracking-tight text-white sm:mx-0 sm:text-5xl lg:text-6xl">
+          <span class="block">Zjistěte</span>
+
+          <span class="word-line block min-h-[1.25em] py-1 sm:inline-block sm:min-w-[10.5ch] sm:align-bottom">
+            <span class="word-wrapper">
+              {#key activeWordIndex}
+                <span class="word-animated">
+                  {rotatingWords[activeWordIndex]}
+                </span>
+              {/key}
+            </span>
           </span>
-          své nemovitosti.
+
+          <span class="block sm:inline">své nemovitosti.</span>
         </h1>
 
-        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
+        <p class="mx-auto mt-6 max-w-2xl text-pretty text-base leading-7 text-slate-200 sm:mx-0 sm:text-lg sm:leading-8">
           Připravíme pro vás srozumitelný odhad tržní ceny podle stavu nemovitosti,
           lokality, aktuální poptávky a reálných prodejů v okolí.
         </p>
@@ -80,7 +84,7 @@
           <button
             type="button"
             onclick={() => scrollToSection('#lead-form')}
-            class="group rounded-2xl bg-white px-7 py-4 text-base font-bold text-slate-950 shadow-2xl shadow-white/10 transition duration-300 hover:-translate-y-1 hover:bg-slate-100 active:scale-[0.98]"
+            class="group inline-flex w-full items-center justify-center rounded-2xl bg-white px-7 py-4 text-base font-bold text-slate-950 shadow-2xl shadow-white/10 transition duration-300 hover:-translate-y-1 hover:bg-slate-100 active:scale-[0.98] sm:w-auto"
           >
             Chci odhad zdarma
             <span class="ml-2 inline-block transition duration-300 group-hover:translate-x-1">→</span>
@@ -89,24 +93,24 @@
           <button
             type="button"
             onclick={() => scrollToSection('#jak-to-funguje')}
-            class="rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/10 active:scale-[0.98]"
+            class="inline-flex w-full items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-bold text-white shadow-lg shadow-black/10 backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/10 active:scale-[0.98] sm:w-auto"
           >
             Informace k odhadu
           </button>
         </div>
 
         <div class="mt-10 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
-          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 text-center shadow-lg shadow-black/10 backdrop-blur sm:text-left">
             <div class="text-3xl font-black text-white">2 min</div>
             <div class="mt-1 text-sm text-slate-200">rychlé zadání</div>
           </div>
 
-          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 text-center shadow-lg shadow-black/10 backdrop-blur sm:text-left">
             <div class="text-3xl font-black text-white">900+</div>
             <div class="mt-1 text-sm text-slate-200">zkušeností z prodejů</div>
           </div>
 
-          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
+          <div class="rounded-3xl border border-white/10 bg-white/10 p-5 text-center shadow-lg shadow-black/10 backdrop-blur sm:text-left">
             <div class="text-3xl font-black text-white">0 Kč</div>
             <div class="mt-1 text-sm text-slate-200">bez závazků</div>
           </div>
@@ -201,8 +205,14 @@
     -webkit-text-fill-color: currentColor;
   }
 
+  .word-line {
+    line-height: 1.08;
+  }
+
   .word-wrapper {
     position: relative;
+    display: inline-block;
+    max-width: 100%;
     overflow: hidden;
     vertical-align: bottom;
   }
@@ -292,6 +302,22 @@
 
   .animate-slow-ping {
     animation: slow-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @media (max-width: 639px) {
+    .word-line {
+      width: 100%;
+    }
+
+    .word-wrapper {
+      width: 100%;
+      text-align: center;
+    }
+
+    .word-animated {
+      max-width: 100%;
+      white-space: normal;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
