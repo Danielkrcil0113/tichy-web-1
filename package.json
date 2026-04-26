@@ -38,6 +38,7 @@
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.5.1",
 		"prettier-plugin-tailwindcss": "^0.7.2",
+		"prisma": "^7.8.0",
 		"svelte": "^5.55.2",
 		"svelte-check": "^4.4.6",
 		"tailwindcss": "^4.2.2",
@@ -48,6 +49,7 @@
 		"vitest-browser-svelte": "^2.1.0"
 	},
 	"dependencies": {
+		"@prisma/client": "^7.8.0",
 		"@supabase/ssr": "^0.10.2",
 		"@supabase/supabase-js": "^2.104.0",
 		"nodemailer": "^8.0.5",
