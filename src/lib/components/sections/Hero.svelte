@@ -61,10 +61,12 @@
 
         <h1 class="mt-7 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
           Zjistěte
-          <span class="block min-h-[1.2em] text-indigo-200 sm:inline-block sm:min-w-[9.5ch]">
-            <span class="inline-block animate-word-swap">
-              {rotatingWords[activeWordIndex]}
-            </span>
+          <span class="word-wrapper block min-h-[1.2em] sm:inline-block sm:min-w-[9.5ch]">
+            {#key activeWordIndex}
+              <span class="word-animated">
+                {rotatingWords[activeWordIndex]}
+              </span>
+            {/key}
           </span>
           své nemovitosti.
         </h1>
@@ -199,6 +201,23 @@
     -webkit-text-fill-color: currentColor;
   }
 
+  .word-wrapper {
+    position: relative;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+
+  .word-animated {
+    display: inline-block;
+    animation: word-reveal 3.6s ease-in-out;
+    background: linear-gradient(90deg, #c7d2fe, #7dd3fc, #ffffff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.35));
+  }
+
   @keyframes hero-in {
     from {
       opacity: 0;
@@ -223,11 +242,11 @@
     }
   }
 
-  @keyframes word-swap {
+  @keyframes word-reveal {
     0% {
       opacity: 0;
-      transform: translateY(16px);
-      filter: blur(4px);
+      transform: translateY(100%);
+      filter: blur(6px);
     }
 
     15% {
@@ -236,7 +255,7 @@
       filter: blur(0);
     }
 
-    85% {
+    78% {
       opacity: 1;
       transform: translateY(0);
       filter: blur(0);
@@ -244,8 +263,8 @@
 
     100% {
       opacity: 0;
-      transform: translateY(-16px);
-      filter: blur(4px);
+      transform: translateY(-100%);
+      filter: blur(6px);
     }
   }
 
@@ -271,10 +290,6 @@
     animation: hero-card 0.9s ease 0.15s forwards;
   }
 
-  .animate-word-swap {
-    animation: word-swap 3.6s ease-in-out infinite;
-  }
-
   .animate-slow-ping {
     animation: slow-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
@@ -282,12 +297,18 @@
   @media (prefers-reduced-motion: reduce) {
     .animate-hero-in,
     .animate-hero-card,
-    .animate-word-swap,
-    .animate-slow-ping {
+    .animate-slow-ping,
+    .word-animated {
       animation: none;
       opacity: 1;
       transform: none;
       filter: none;
+    }
+
+    .word-animated {
+      background: none;
+      color: #c7d2fe;
+      -webkit-text-fill-color: currentColor;
     }
   }
 </style>
