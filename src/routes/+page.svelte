@@ -31,69 +31,68 @@
   let helpBoxClosed = $state(false);
 
   const phoneNumber = '+420 602 447 432';
-  const phoneHref = 'tel:+420602447432';
   const availabilityText = 'Po–Pá 9:00–18:00';
 
   onMount(() => {
-  let idleTimer: number | undefined;
+    let idleTimer: number | undefined;
 
-  const showHelp = () => {
-    if (!helpBoxClosed && !isLoading) {
-      showHelpBox = true;
-    }
-  };
+    const showHelp = () => {
+      if (!helpBoxClosed && !isLoading) {
+        showHelpBox = true;
+      }
+    };
 
-  const resetIdleTimer = () => {
-    if (idleTimer) {
-      window.clearTimeout(idleTimer);
-    }
+    const resetIdleTimer = () => {
+      if (idleTimer) {
+        window.clearTimeout(idleTimer);
+      }
 
-    idleTimer = window.setTimeout(() => {
-      showHelp();
-    }, 60000);
-  };
+      idleTimer = window.setTimeout(() => {
+        showHelp();
+      }, 60000);
+    };
 
-  const handleScroll = () => {
-    const scrollTop = window.scrollY;
-    const viewportHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
 
-    const scrollProgress = (scrollTop + viewportHeight) / documentHeight;
+      const scrollProgress = (scrollTop + viewportHeight) / documentHeight;
 
-    if (scrollProgress >= 0.75) {
-      showHelp();
-    }
+      if (scrollProgress >= 0.75) {
+        showHelp();
+      }
 
-    resetIdleTimer();
-  };
+      resetIdleTimer();
+    };
 
-  const handleUserActivity = () => {
-    resetIdleTimer();
-  };
+    const handleUserActivity = () => {
+      resetIdleTimer();
+    };
 
-  const loadingTimer = window.setTimeout(() => {
-    isLoading = false;
-    resetIdleTimer();
-  }, 2500);
+    const loadingTimer = window.setTimeout(() => {
+      isLoading = false;
+      resetIdleTimer();
+    }, 2500);
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('click', handleUserActivity);
-  window.addEventListener('keydown', handleUserActivity);
-  window.addEventListener('touchstart', handleUserActivity, { passive: true });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('click', handleUserActivity);
+    window.addEventListener('keydown', handleUserActivity);
+    window.addEventListener('touchstart', handleUserActivity, { passive: true });
 
-  return () => {
-    window.clearTimeout(loadingTimer);
+    return () => {
+      window.clearTimeout(loadingTimer);
 
-    if (idleTimer) {
-      window.clearTimeout(idleTimer);
-    }
+      if (idleTimer) {
+        window.clearTimeout(idleTimer);
+      }
 
-    window.removeEventListener('scroll', handleScroll);
-    window.removeEventListener('click', handleUserActivity);
-    window.removeEventListener('keydown', handleUserActivity);
-    window.removeEventListener('touchstart', handleUserActivity);
-  };
-});
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('click', handleUserActivity);
+      window.removeEventListener('keydown', handleUserActivity);
+      window.removeEventListener('touchstart', handleUserActivity);
+    };
+  });
 
   function closeHelpBox() {
     helpBoxClosed = true;
@@ -243,9 +242,9 @@
       <div class="relative pr-8">
         <div class="flex items-center gap-4">
           <div class="relative">
-            <span class="animate-soft-pulse absolute inset-0 rounded-2xl bg-indigo-500/30"></span>
+            <span class="animate-soft-pulse absolute inset-0 rounded-2xl bg-slate-400/25"></span>
 
-            <div class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-950 text-white shadow-xl shadow-slate-950/25">
+            <div class="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800 text-white shadow-xl shadow-slate-950/20">
               <svg class="animate-phone-ring h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path
                   stroke-linecap="round"
@@ -257,10 +256,10 @@
           </div>
 
           <div>
-            <div class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 ring-1 ring-emerald-200">
+            <div class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 ring-1 ring-slate-200">
               <span class="relative flex h-2 w-2">
-                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-70"></span>
-                <span class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-slate-500 opacity-60"></span>
+                <span class="relative inline-flex h-2 w-2 rounded-full bg-slate-500"></span>
               </span>
               Telefonická pomoc
             </div>
@@ -277,28 +276,32 @@
 
         <p class="mt-3 text-sm leading-6 text-slate-600">
           Rádi vám pomůžeme s odhadem, výběrem typu nemovitosti i dalším postupem.
-          Zavolejte nám v pracovní době.
+          Telefonická pomoc je dostupná v pracovní době.
         </p>
 
-        <a
-          href={phoneHref}
-          class="group relative mt-5 flex w-full items-center justify-between overflow-hidden rounded-2xl bg-slate-950 px-5 py-4 text-white shadow-xl shadow-slate-950/20 transition hover:-translate-y-0.5 hover:bg-indigo-600"
+        <div
+          aria-disabled="true"
+          class="mt-5 flex w-full cursor-not-allowed items-center justify-between rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-slate-500 shadow-sm"
         >
-          <span class="animate-shine pointer-events-none absolute inset-y-0 left-0 w-16 bg-white/20"></span>
-
           <span>
-            <span class="block text-xs font-bold uppercase tracking-widest text-white/60">
-              Zavolat Po–Pá 9–18
+            <span class="block text-xs font-bold uppercase tracking-widest text-slate-400">
+              Telefon Po–Pá 9–18
             </span>
-            <span class="mt-0.5 block text-base font-black">
+            <span class="mt-0.5 block text-base font-black text-slate-600">
               {phoneNumber}
             </span>
           </span>
 
-          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 transition group-hover:translate-x-1 group-hover:bg-white/20">
-            →
+          <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-500">
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M18.364 18.364A9 9 0 0 1 5.636 5.636m12.728 12.728A9 9 0 0 0 5.636 5.636m12.728 12.728L5.636 5.636"
+              />
+            </svg>
           </span>
-        </a>
+        </div>
 
         <p class="mt-3 text-center text-xs font-medium text-slate-400">
           Bez závazků · rychlá domluva · lidský přístup
