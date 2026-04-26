@@ -40,7 +40,7 @@
   }
 </script>
 
-<section class="hero-section relative overflow-hidden bg-slate-950 text-white">
+<section id="domu" class="hero-section relative overflow-hidden bg-slate-950 text-white">
   <div class="absolute inset-0">
     <div class="absolute left-1/2 top-[-20rem] h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-indigo-500/15 blur-3xl"></div>
     <div class="absolute bottom-[-20rem] right-[-12rem] h-[34rem] w-[34rem] rounded-full bg-sky-400/10 blur-3xl"></div>

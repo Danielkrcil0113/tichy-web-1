@@ -6,6 +6,7 @@
   let activeHash = $state('');
 
   const links = [
+    { label: 'Domů', href: '/#domu', hash: '#domu' },
     { label: 'Online vs Ruční odhad', href: '/#online-rucni-odhad', hash: '#online-rucni-odhad' },
     { label: 'Reference', href: '/#reference', hash: '#reference' },
     { label: 'FAQ', href: '/#faq', hash: '#faq' }
