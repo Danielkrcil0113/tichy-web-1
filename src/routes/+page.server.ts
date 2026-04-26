@@ -380,7 +380,7 @@ export const actions: Actions = {
 
     const { data: lead, error: leadError } = await supabaseAdmin
       .from('leads')
-      .insert({
+  .insert({
   lead_type: 'valuation',
   property_type: values.property_type,
   purpose: values.purpose,
