@@ -17,6 +17,10 @@
       a: 'Online odhad je rychlý, ale pracuje s průměry. My se na vaši nemovitost díváme konkrétně – v kontextu trhu, lokality a aktuální poptávky. Díky tomu vám dokážeme říct nejen číslo, ale i to, jak ho skutečně dosáhnout.'
     },
     {
+      q: 'Proč je součástí odhadu osobní prohlídka?',
+      a: 'Protože detaily rozhodují. Fotky a popisy jsou dobrý začátek, ale osobní návštěva nám umožní vidět věci, které z dat ani fotografií nepoznáte. Posoudíme skutečný stav nemovitosti, dispozici, okolí, technické detaily i celkový dojem, který může mít velký vliv na výslednou cenu.'
+    },
+    {
       q: 'V čem je váš odhad jiný?',
       a: 'Nejde jen o číslo. Díváme se na stav nemovitosti, její potenciál, aktuální trh i chování kupujících – a také na situaci, pro kterou odhad potřebujete. Výsledkem je odhad, podle kterého se dá opravdu prodávat – ne jen orientovat.'
     },
@@ -43,10 +47,6 @@
     {
       q: 'Co se stane po odeslání poptávky?',
       a: 'Ozveme se vám a domluvíme si další postup. Většinou následuje osobní setkání, kde si nemovitost projdeme, uděláme základní fotodokumentaci, přeměříme dispozice a probereme všechna specifika. Díky tomu můžeme připravit odhad opravdu na míru.'
-    },
-    {
-      q: 'Proč je součástí odhadu osobní prohlídka?',
-      a: 'Protože detaily rozhodují. Fotky a popisy jsou dobrý začátek, ale osobní návštěva nám umožní vidět věci, které z dat ani fotografií nepoznáte.'
     }
   ];
 
@@ -82,7 +82,7 @@
           {/if}
 
           <h3 class="text-lg font-semibold">{item.q}</h3>
-          <p class="mt-3 text-sm opacity-80">{item.a}</p>
+          <p class="mt-3 text-sm leading-6 opacity-80">{item.a}</p>
         </article>
       {/each}
     </div>
@@ -90,7 +90,7 @@
     {#if faqs.length > 4}
       <div class="mt-10 flex justify-center">
         <button
-          on:click={() => (showAll = !showAll)}
+          onclick={() => (showAll = !showAll)}
           class="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:scale-105"
         >
           {showAll ? 'Zobrazit méně' : `Zobrazit dalších ${faqs.length - 4}`}
@@ -106,6 +106,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
