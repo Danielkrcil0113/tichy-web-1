@@ -6,6 +6,7 @@
   let activeHash = $state('');
 
   const links = [
+    { label: 'Online vs Ruční odhad', href: '/#jak-to-funguje', hash: '#jak-to-funguje' },
     { label: 'Reference', href: '/#reference', hash: '#reference' },
     { label: 'FAQ', href: '/#faq', hash: '#faq' }
   ] as const;
