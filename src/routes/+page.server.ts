@@ -431,8 +431,8 @@ export const actions: Actions = {
           : 'Výtah v domě: nerelevantní';
 
       const adminEmail = await resend.emails.send({
-        from: 'Nejlepší odhad <noreply@nejlepsiodhadnemovitosti.cz>',
-        to: ['info@nejlepsiodhadnemovitosti.cz'],
+        from: 'Nejlepšíodhadnemovitostí<noreply@nejlepsiodhadnemovitosti.cz>',
+        to: ['jan.tichy85@gmail.com'],
         replyTo: values.email || 'info@nejlepsiodhadnemovitosti.cz',
         subject: `Nová poptávka po odhadu: ${propertyTypeLabel} - ${values.city}`,
         html: createAdminEmailHtml({
