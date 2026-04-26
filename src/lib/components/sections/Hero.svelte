@@ -1,28 +1,11 @@
 <script lang="ts">
-  const rotatingWords = [
-    'tržní cenu',
-    'reálnou hodnotu',
-    'prodejní potenciál',
-    'správnou strategii'
-  ];
+  const rotatingWords = ['tržní cenu', 'reálnou hodnotu', 'prodejní potenciál', 'správnou strategii'];
 
   const analysisSteps = [
-    {
-      title: 'Lokalita a okolí',
-      description: 'Posuzujeme atraktivitu místa a okolí.'
-    },
-    {
-      title: 'Stav nemovitosti',
-      description: 'Bereme v úvahu dispozici, stav i potenciál.'
-    },
-    {
-      title: 'Reálné prodeje v trhu',
-      description: 'Porovnáváme s reálnými prodeji na trhu.'
-    },
-    {
-      title: 'Doporučená strategie',
-      description: 'Doporučíme cenu a další možný postup.'
-    }
+    { title: 'Lokalita a okolí', description: 'Posuzujeme atraktivitu místa a okolí.' },
+    { title: 'Stav nemovitosti', description: 'Bereme v úvahu dispozici, stav i potenciál.' },
+    { title: 'Reálné prodeje v trhu', description: 'Porovnáváme s reálnými prodeji na trhu.' },
+    { title: 'Doporučená strategie', description: 'Doporučíme cenu a další možný postup.' }
   ];
 
   let activeWordIndex = $state(0);
@@ -57,7 +40,7 @@
   }
 </script>
 
-<section class="relative overflow-hidden bg-slate-950 text-white">
+<section class="hero-section relative overflow-hidden bg-slate-950 text-white">
   <div class="absolute inset-0">
     <div class="absolute left-1/2 top-[-20rem] h-[42rem] w-[42rem] -translate-x-1/2 rounded-full bg-indigo-500/15 blur-3xl"></div>
     <div class="absolute bottom-[-20rem] right-[-12rem] h-[34rem] w-[34rem] rounded-full bg-sky-400/10 blur-3xl"></div>
@@ -65,10 +48,10 @@
 
   <div class="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.045)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.045)_1px,transparent_1px)] bg-[size:90px_90px] opacity-20"></div>
 
-  <div class="relative mx-auto max-w-7xl px-6 pb-20 pt-20 md:pb-24 md:pt-28 lg:px-8">
-    <div class="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+  <div class="relative mx-auto max-w-7xl px-4 pb-16 pt-16 sm:px-6 sm:pb-20 sm:pt-20 md:pb-24 md:pt-28 lg:px-8">
+    <div class="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
       <div class="animate-hero-in">
-        <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 backdrop-blur">
+        <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-medium text-slate-100 backdrop-blur">
           <span class="relative flex h-2.5 w-2.5">
             <span class="absolute inline-flex h-full w-full animate-slow-ping rounded-full bg-emerald-400 opacity-70"></span>
             <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
@@ -78,7 +61,7 @@
 
         <h1 class="mt-7 max-w-4xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
           Zjistěte
-          <span class="block min-h-[1.2em] bg-gradient-to-r from-indigo-300 via-sky-200 to-white bg-clip-text text-transparent sm:inline-block sm:min-w-[9.5ch]">
+          <span class="block min-h-[1.2em] text-indigo-200 sm:inline-block sm:min-w-[9.5ch]">
             <span class="inline-block animate-word-swap">
               {rotatingWords[activeWordIndex]}
             </span>
@@ -86,7 +69,7 @@
           své nemovitosti.
         </h1>
 
-        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-300">
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-slate-200">
           Připravíme pro vás srozumitelný odhad tržní ceny podle stavu nemovitosti,
           lokality, aktuální poptávky a reálných prodejů v okolí.
         </p>
@@ -95,7 +78,7 @@
           <button
             type="button"
             onclick={() => scrollToSection('#lead-form')}
-            class="group rounded-2xl bg-white px-7 py-4 text-base font-bold text-slate-950 shadow-2xl shadow-white/10 transition duration-300 hover:-translate-y-1 hover:bg-slate-100"
+            class="group rounded-2xl bg-white px-7 py-4 text-base font-bold text-slate-950 shadow-2xl shadow-white/10 transition duration-300 hover:-translate-y-1 hover:bg-slate-100 active:scale-[0.98]"
           >
             Chci odhad zdarma
             <span class="ml-2 inline-block transition duration-300 group-hover:translate-x-1">→</span>
@@ -104,26 +87,26 @@
           <button
             type="button"
             onclick={() => scrollToSection('#jak-to-funguje')}
-            class="rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/10"
+            class="rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-bold text-white backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/10 active:scale-[0.98]"
           >
-            Informace k odhadu 
+            Informace k odhadu
           </button>
         </div>
 
         <div class="mt-10 grid max-w-2xl grid-cols-1 gap-4 sm:grid-cols-3">
           <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
             <div class="text-3xl font-black text-white">2 min</div>
-            <div class="mt-1 text-sm text-slate-300">rychlé zadání</div>
+            <div class="mt-1 text-sm text-slate-200">rychlé zadání</div>
           </div>
 
           <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
             <div class="text-3xl font-black text-white">900+</div>
-            <div class="mt-1 text-sm text-slate-300">zkušeností z prodejů</div>
+            <div class="mt-1 text-sm text-slate-200">zkušeností z prodejů</div>
           </div>
 
           <div class="rounded-3xl border border-white/10 bg-white/10 p-5 backdrop-blur">
             <div class="text-3xl font-black text-white">0 Kč</div>
-            <div class="mt-1 text-sm text-slate-300">bez závazků</div>
+            <div class="mt-1 text-sm text-slate-200">bez závazků</div>
           </div>
         </div>
       </div>
@@ -131,10 +114,10 @@
       <div class="relative animate-hero-card">
         <div class="absolute -inset-6 rounded-[3rem] bg-gradient-to-tr from-indigo-500/15 via-sky-400/10 to-white/10 blur-2xl"></div>
 
-        <div class="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-white/10 p-6 shadow-2xl shadow-black/30 backdrop-blur-xl sm:p-8">
+        <div class="relative overflow-hidden rounded-[2rem] border border-white/10 bg-slate-900/95 p-5 shadow-2xl shadow-black/30 backdrop-blur-xl sm:rounded-[2.5rem] sm:p-8">
           <div class="mb-8 flex items-start justify-between gap-6">
             <div>
-              <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">
+              <p class="text-sm font-semibold uppercase tracking-wide text-slate-300">
                 Průběh odhadu
               </p>
               <h2 class="mt-2 text-2xl font-black text-white">
@@ -147,17 +130,17 @@
             </div>
           </div>
 
-          <div class="rounded-3xl border border-white/10 bg-slate-950/60 p-5">
+          <div class="rounded-3xl border border-white/10 bg-slate-950 p-5">
             <div class="mb-4 flex items-center justify-between gap-4">
-              <span class="text-sm font-semibold text-slate-300">
+              <span class="text-sm font-semibold text-slate-200">
                 Aktuálně: {analysisSteps[activeStepIndex].title}
               </span>
-              <span class="text-sm font-bold text-indigo-300">{progress}%</span>
+              <span class="text-sm font-bold text-indigo-200">{progress}%</span>
             </div>
 
             <div class="h-2.5 overflow-hidden rounded-full bg-white/10">
               <div
-                class="h-full rounded-full bg-gradient-to-r from-indigo-400 via-sky-300 to-emerald-300 transition-all duration-500 ease-out"
+                class="h-full rounded-full bg-indigo-400 transition-all duration-500 ease-out"
                 style={`width: ${progress}%`}
               ></div>
             </div>
@@ -168,7 +151,7 @@
               <div
                 class={`flex items-center gap-4 rounded-2xl border p-4 transition duration-700 ${
                   index === activeStepIndex
-                    ? 'border-indigo-300/40 bg-indigo-400/10'
+                    ? 'border-indigo-300/40 bg-indigo-500/15'
                     : 'border-white/10 bg-white/5'
                 }`}
               >
@@ -176,7 +159,7 @@
                   class={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-sm font-black transition duration-700 ${
                     index <= activeStepIndex
                       ? 'bg-white text-slate-950'
-                      : 'bg-white/10 text-slate-400'
+                      : 'bg-white/10 text-slate-200'
                   }`}
                 >
                   {index + 1}
@@ -184,7 +167,7 @@
 
                 <div>
                   <div class="font-semibold text-white">{item.title}</div>
-                  <p class="mt-1 text-sm leading-6 text-slate-400">
+                  <p class="mt-1 text-sm leading-6 text-slate-300">
                     {item.description}
                   </p>
                 </div>
@@ -195,7 +178,7 @@
           <button
             type="button"
             onclick={() => scrollToSection('#lead-form')}
-            class="mt-7 block w-full rounded-2xl bg-indigo-600 px-5 py-4 text-center font-bold text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:bg-indigo-500"
+            class="mt-7 block w-full rounded-2xl bg-indigo-600 px-5 py-4 text-center font-bold text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:bg-indigo-500 active:scale-[0.98]"
           >
             Začít odhad zdarma
           </button>
@@ -206,6 +189,16 @@
 </section>
 
 <style>
+  .hero-section {
+    color-scheme: dark;
+    forced-color-adjust: none;
+  }
+
+  .hero-section,
+  .hero-section * {
+    -webkit-text-fill-color: currentColor;
+  }
+
   @keyframes hero-in {
     from {
       opacity: 0;
@@ -262,7 +255,8 @@
       opacity: 0.7;
     }
 
-    75%, 100% {
+    75%,
+    100% {
       transform: scale(2.2);
       opacity: 0;
     }
