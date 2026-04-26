@@ -56,6 +56,7 @@
             <span class="absolute inline-flex h-full w-full animate-slow-ping rounded-full bg-emerald-400 opacity-70"></span>
             <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
           </span>
+
           <span class="truncate">Odhad zdarma a bez závazků</span>
         </div>
 
@@ -92,7 +93,7 @@
 
           <button
             type="button"
-            onclick={() => scrollToSection('#jak-to-funguje')}
+            onclick={() => scrollToSection('#online-rucni-odhad')}
             class="inline-flex w-full items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-7 py-4 text-base font-bold text-white shadow-lg shadow-black/10 backdrop-blur transition duration-300 hover:-translate-y-1 hover:bg-white/10 active:scale-[0.98] sm:w-auto"
           >
             Informace k odhadu
@@ -126,6 +127,7 @@
               <p class="text-sm font-semibold uppercase tracking-wide text-slate-300">
                 Průběh odhadu
               </p>
+
               <h2 class="mt-2 text-2xl font-black text-white">
                 Co při ocenění sledujeme
               </h2>
@@ -141,6 +143,7 @@
               <span class="text-sm font-semibold text-slate-200">
                 Aktuálně: {analysisSteps[activeStepIndex].title}
               </span>
+
               <span class="text-sm font-bold text-indigo-200">{progress}%</span>
             </div>
 
@@ -173,6 +176,7 @@
 
                 <div>
                   <div class="font-semibold text-white">{item.title}</div>
+
                   <p class="mt-1 text-sm leading-6 text-slate-300">
                     {item.description}
                   </p>

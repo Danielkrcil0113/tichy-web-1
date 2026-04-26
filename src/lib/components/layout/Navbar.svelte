@@ -18,6 +18,24 @@
 
   function scrollToHash(hash: string) {
     window.setTimeout(() => {
+      if (hash === '#domu') {
+        const homeSection = document.querySelector(hash);
+
+        if (homeSection) {
+          homeSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        } else {
+          window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+        }
+
+        return;
+      }
+
       document.querySelector(hash)?.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
@@ -38,6 +56,22 @@
       }
 
       scrollToHash(hash);
+    }
+  }
+
+  function handleLogoClick(event: MouseEvent) {
+    closeMenu();
+
+    if (typeof window === 'undefined') return;
+
+    if (window.location.pathname === '/') {
+      event.preventDefault();
+
+      if (window.location.hash !== '#domu') {
+        history.pushState(null, '', '#domu');
+      }
+
+      scrollToHash('#domu');
     }
   }
 
@@ -67,6 +101,11 @@
 
     function updateActiveSection() {
       let current = '';
+
+      if (window.scrollY < 120) {
+        activeHash = '#domu';
+        return;
+      }
 
       for (const section of sections) {
         const rect = section.getBoundingClientRect();
@@ -101,13 +140,18 @@
     section {
       scroll-margin-top: 110px;
     }
+
+    #domu {
+      scroll-margin-top: 0;
+    }
   </style>
 </svelte:head>
 
 <nav class="sticky top-0 z-50 border-b border-white/10 bg-slate-950/80 backdrop-blur-xl transition-all">
   <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
     <a
-      href={resolve('/')}
+      href={resolve('/#domu')}
+      onclick={handleLogoClick}
       class="flex items-center gap-3 rounded-2xl outline-none transition-transform duration-300 hover:scale-[1.03] focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
       aria-label="Zpět na hlavní stránku"
     >
