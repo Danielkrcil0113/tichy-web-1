@@ -9,12 +9,12 @@
   const stars = [1, 2, 3, 4, 5];
 
   const testimonials: Testimonial[] = [
-    {
-      name: 'Martin Kovář',
-      role: 'Prodej bytu 3+1',
-      rating: 4.5,
-      text: 'Potřebovali jsme znát hodnotu bytu kvůli dědictví. Odhad jsme dostali bleskově a celý tým nám navíc poskytl skvělou strategii pro náš další postup, abychom neprodělali.'
-    },
+{
+  name: 'Martin Kovář',
+  role: 'Vypořádání dědictví',
+  rating: 4.5,
+  text: 'Odhad jsme potřebovali kvůli vypořádání dědictví. Mile mě překvapila skvělá komunikace, rychlý přístup a výborné znalosti trhu. Vše bylo vysvětlené srozumitelně a profesionálně.'
+},
     {
       name: 'rodina Novotná',
       role: 'Prodej rodinného domu',
