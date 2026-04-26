@@ -6,7 +6,6 @@
   let activeHash = $state('');
 
   const links = [
-
     { label: 'Reference', href: '/#reference', hash: '#reference' },
     { label: 'FAQ', href: '/#faq', hash: '#faq' }
   ] as const;

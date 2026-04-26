@@ -3,6 +3,7 @@
     name: string;
     role: string;
     text: string;
+    rating: number;
   }
 
   const stars = [1, 2, 3, 4, 5];
@@ -11,19 +12,28 @@
     {
       name: 'Martin Kovář',
       role: 'Prodej bytu 3+1',
+      rating: 4.5,
       text: 'Potřebovali jsme znát hodnotu bytu kvůli dědictví. Odhad jsme dostali bleskově a celý tým nám navíc poskytl skvělou strategii pro náš další postup, abychom neprodělali.'
     },
     {
       name: 'rodina Novotná',
       role: 'Prodej rodinného domu',
+      rating: 5,
       text: 'Díky profesionální analýze tohoto týmu jsme zjistili, že můžeme náš dům prodat o neuvěřitelných půl milionu dráž, než jsme si původně mysleli. Naprostá spokojenost.'
     },
     {
       name: 'Petr Dvořák',
       role: 'Orientační odhad pozemku',
+      rating: 5,
       text: 'Ocenění proběhlo rychle, precizně a zcela zdarma. Skvělá komunikace celého týmu, žádný tlak, jen špičkové know-how. Rozhodně doporučuji všem!'
     }
   ];
+
+  function getStarFill(rating: number, star: number) {
+    if (rating >= star) return 'full';
+    if (rating >= star - 0.5) return 'half';
+    return 'empty';
+  }
 </script>
 
 <section id="reference" class="relative overflow-hidden bg-slate-950 py-24 sm:py-28">
@@ -53,17 +63,56 @@
       {#each testimonials as item (item.name)}
         <article class="group relative overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-7 shadow-xl backdrop-blur-md transition-all hover:-translate-y-2">
           <div class="relative z-10">
-            <div class="mb-5 flex items-center gap-1 text-amber-400">
+            <div class="mb-5 flex items-center gap-1 text-amber-400" aria-label={`${item.rating} z 5 hvězdiček`}>
               {#each stars as star (star)}
-                <svg
-                  class="h-5 w-5 -translate-y-px"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
+                {@const fill = getStarFill(item.rating, star)}
+
+                {#if fill === 'full'}
+                  <svg
+                    class="h-5 w-5 -translate-y-px"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                {:else if fill === 'half'}
+                  <span class="relative inline-block h-5 w-5 -translate-y-px">
+                    <svg
+                      class="absolute inset-0 h-5 w-5 text-slate-600"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      aria-hidden="true"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+
+                    <span class="absolute inset-0 w-1/2 overflow-hidden text-amber-400">
+                      <svg
+                        class="h-5 w-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        aria-hidden="true"
+                      >
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    </span>
+                  </span>
+                {:else}
+                  <svg
+                    class="h-5 w-5 -translate-y-px text-slate-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    aria-hidden="true"
+                  >
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.176 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81H7.03a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                {/if}
               {/each}
+
+              <span class="ml-2 text-sm font-bold text-slate-300">
+                {item.rating.toFixed(1)}
+              </span>
             </div>
 
             <p class="text-base leading-8 text-slate-300">
