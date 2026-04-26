@@ -6,13 +6,38 @@
   let activeHash = $state('');
 
   const links = [
-    { label: 'Online vs Ruční odhad', href: '/#jak-to-funguje', hash: '#jak-to-funguje' },
+    { label: 'Online vs Ruční odhad', href: '/#online-rucni-odhad', hash: '#online-rucni-odhad' },
     { label: 'Reference', href: '/#reference', hash: '#reference' },
     { label: 'FAQ', href: '/#faq', hash: '#faq' }
   ] as const;
 
   function closeMenu() {
     isMenuOpen = false;
+  }
+
+  function scrollToHash(hash: string) {
+    window.setTimeout(() => {
+      document.querySelector(hash)?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 50);
+  }
+
+  function handleNavClick(event: MouseEvent, hash: string) {
+    closeMenu();
+
+    if (typeof window === 'undefined') return;
+
+    if (window.location.pathname === '/') {
+      event.preventDefault();
+
+      if (window.location.hash !== hash) {
+        history.pushState(null, '', hash);
+      }
+
+      scrollToHash(hash);
+    }
   }
 
   function handleEstimateClick(event: MouseEvent) {
@@ -96,6 +121,7 @@
       {#each links as link (link.href)}
         <a
           href={resolve(link.href)}
+          onclick={(event) => handleNavClick(event, link.hash)}
           class={`group relative rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200 ${
             activeHash === link.hash
               ? 'text-white'
@@ -148,12 +174,12 @@
           {#each links as link (link.href)}
             <a
               href={resolve(link.href)}
+              onclick={(event) => handleNavClick(event, link.hash)}
               class={`rounded-xl px-4 py-3 text-base font-medium transition-colors duration-200 ${
                 activeHash === link.hash
                   ? 'bg-white/10 text-white'
                   : 'text-slate-200 hover:bg-white/5 hover:text-white'
               }`}
-              onclick={closeMenu}
             >
               {link.label}
             </a>

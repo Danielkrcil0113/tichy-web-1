@@ -13,8 +13,7 @@
     'aktuální situaci na trhu'
   ];
 </script>
-
-<section id="jak-to-funguje" class="relative overflow-hidden bg-slate-50">
+<section id="online-rucni-odhad" class="relative overflow-hidden bg-slate-50">
   <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(15,23,42,0.08),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(79,70,229,0.12),transparent_32%)]"></div>
 
   <div class="relative mx-auto max-w-7xl px-6 py-20 lg:py-24">
