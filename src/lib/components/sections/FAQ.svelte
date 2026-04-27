@@ -26,7 +26,7 @@
     },
     {
       q: 'Proč zrovna vy?',
-      a: 'Jsme tým 7 specialistů s více než 100 lety zkušeností v realitách a financích. Podíleli jsme se na prodeji více než 900 nemovitostí. Každý obchod nás naučil něco nového – a právě tyhle zkušenosti dnes přenášíme k vám.'
+      a: 'Jsme tým 7 specialistů a dohromady máme přes 110 let zkušeností v realitách a financích. Podíleli jsme se na prodeji více než 900 nemovitostí a víme, že každý obchod je jiný. Právě tyto zkušenosti dnes využíváme ve váš prospěch.'
     },
     {
       q: 'Kde odhady zajišťujete?',
