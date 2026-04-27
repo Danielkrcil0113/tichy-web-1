@@ -100,9 +100,7 @@
           </h3>
 
           <p class="mt-4 leading-7 text-slate-300">
-            Ruční odhad je o zkušenosti a kontextu. Díváme se na vaši
-            nemovitost jako celek – ne jen jako na řádek v tabulce.
-          </p>
+            Ruční odhad je o zkušenosti a kontextu. Na vaši nemovitost se diváme v souvislostech, ne jen, jako na číslo v tabulce. </p>
 
           <div class="mt-6 rounded-2xl border border-white/10 bg-white/10 p-5 backdrop-blur">
             <p class="text-sm font-bold text-white">
