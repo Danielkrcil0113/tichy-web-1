@@ -16,7 +16,7 @@
   text: 'Odhad jsme potřebovali kvůli vypořádání dědictví. Mile mě překvapila skvělá komunikace, rychlý přístup a výborné znalosti trhu. Vše bylo vysvětlené srozumitelně a profesionálně.'
 },
     {
-      name: 'rodina Novotná',
+      name: 'rodina Novotných',
       role: 'Prodej rodinného domu',
       rating: 5,
       text: 'Díky profesionální analýze tohoto týmu jsme zjistili, že můžeme náš dům prodat o neuvěřitelných půl milionu dráž, než jsme si původně mysleli. Naprostá spokojenost.'
