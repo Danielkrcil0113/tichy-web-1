@@ -30,133 +30,8 @@
   let showHelpBox = $state(false);
   let helpBoxClosed = $state(false);
 
-  const siteUrl = 'https://www.nejlepsiodhadnemovitosti.cz';
-  const siteName = 'Nejlepší Odhad';
-
   const phoneNumber = '+420 602 447 432';
-  const phoneNumberHref = '+420602447432';
-  const email = 'info@nejlepsiodhadnemovitosti.cz';
   const availabilityText = 'Po–Pá 9:00–18:00';
-
-  const seoTitle = 'Odhad nemovitosti zdarma | Ústecký kraj, Praha a Středočeský kraj';
-  const seoDescription =
-    'Zjistěte reálnou tržní cenu bytu, domu nebo pozemku. Ruční odhad nemovitosti zdarma pro Ústecký kraj, Prahu a Středočeský kraj.';
-
-  const structuredData = {
-    '@context': 'https://schema.org',
-    '@type': 'RealEstateAgent',
-    '@id': `${siteUrl}/#business`,
-    name: siteName,
-    legalName: 'Jan Tichý',
-    url: `${siteUrl}/`,
-    logo: `${siteUrl}/logo.jpeg`,
-    image: `${siteUrl}/og-image.jpg`,
-    description:
-      'Ruční odhad tržní ceny nemovitosti zdarma pro byty, domy a pozemky v Ústeckém kraji, Praze a Středočeském kraji.',
-    telephone: phoneNumberHref,
-    email,
-    priceRange: '0 Kč',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: 'Muchova 2888/2',
-      addressLocality: 'Ústí nad Labem',
-      postalCode: '400 11',
-      addressCountry: 'CZ'
-    },
-    areaServed: [
-      {
-        '@type': 'AdministrativeArea',
-        name: 'Ústecký kraj'
-      },
-      {
-        '@type': 'AdministrativeArea',
-        name: 'Středočeský kraj'
-      },
-      {
-        '@type': 'City',
-        name: 'Praha'
-      },
-      {
-        '@type': 'City',
-        name: 'Ústí nad Labem'
-      },
-      {
-        '@type': 'City',
-        name: 'Teplice'
-      },
-      {
-        '@type': 'City',
-        name: 'Děčín'
-      },
-      {
-        '@type': 'City',
-        name: 'Litoměřice'
-      },
-      {
-        '@type': 'City',
-        name: 'Most'
-      },
-      {
-        '@type': 'City',
-        name: 'Chomutov'
-      },
-      {
-        '@type': 'City',
-        name: 'Louny'
-      },
-      {
-        '@type': 'City',
-        name: 'Kladno'
-      },
-      {
-        '@type': 'City',
-        name: 'Mělník'
-      },
-      {
-        '@type': 'City',
-        name: 'Beroun'
-      },
-      {
-        '@type': 'City',
-        name: 'Mladá Boleslav'
-      },
-      {
-        '@type': 'City',
-        name: 'Praha-východ'
-      },
-      {
-        '@type': 'City',
-        name: 'Praha-západ'
-      }
-    ],
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '09:00',
-        closes: '18:00'
-      }
-    ],
-    makesOffer: [
-      {
-        '@type': 'Offer',
-        name: 'Odhad nemovitosti zdarma',
-        price: '0',
-        priceCurrency: 'CZK',
-        itemOffered: {
-          '@type': 'Service',
-          name: 'Ruční odhad tržní ceny nemovitosti',
-          areaServed: ['Ústecký kraj', 'Praha', 'Středočeský kraj']
-        }
-      }
-    ]
-  };
-
-  const structuredDataHtml =
-    '<script type="application/ld+json">' +
-    JSON.stringify(structuredData).replace(/</g, '\\u003c') +
-    '</' +
-    'script>';
 
   onMount(() => {
     let idleTimer: number | undefined;
@@ -226,30 +101,7 @@
 </script>
 
 <svelte:head>
-  <title>{seoTitle}</title>
-
-  <meta name="description" content={seoDescription} />
-  <meta name="robots" content="index, follow, max-image-preview:large" />
-  <meta name="author" content={siteName} />
-  <meta name="theme-color" content="#11223A" />
-
-  <link rel="canonical" href={`${siteUrl}/`} />
-
-  <meta property="og:type" content="website" />
-  <meta property="og:locale" content="cs_CZ" />
-  <meta property="og:site_name" content={siteName} />
-  <meta property="og:title" content={seoTitle} />
-  <meta property="og:description" content={seoDescription} />
-  <meta property="og:url" content={`${siteUrl}/`} />
-  <meta property="og:image" content={`${siteUrl}/og-image.jpg`} />
-  <meta property="og:image:alt" content="Odhad nemovitosti zdarma - Nejlepší Odhad" />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content={seoTitle} />
-  <meta name="twitter:description" content={seoDescription} />
-  <meta name="twitter:image" content={`${siteUrl}/og-image.jpg`} />
-
-  {@html structuredDataHtml}
+  <title>Nejlepší Odhad | Odhad nemovitosti zdarma</title>
 
   <style>
     @keyframes sweep {
@@ -339,7 +191,7 @@
     <div class="relative flex flex-col items-center px-4">
       <img
         src="/logo.jpeg"
-        alt="Nejlepší Odhad - odhad nemovitosti zdarma"
+        alt="Logo"
         class="h-32 w-auto animate-pulse object-contain drop-shadow-2xl md:h-48"
       />
 
@@ -427,16 +279,15 @@
           Telefonická pomoc je dostupná v pracovní době.
         </p>
 
-        <a
-          href={`tel:${phoneNumberHref}`}
-          class="mt-5 flex w-full items-center justify-between rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-slate-600 shadow-sm transition hover:bg-slate-200 hover:text-slate-950"
-          aria-label={`Zavolat na telefon ${phoneNumber}`}
+        <div
+          aria-disabled="true"
+          class="mt-5 flex w-full cursor-not-allowed items-center justify-between rounded-2xl border border-slate-200 bg-slate-100 px-5 py-4 text-slate-500 shadow-sm"
         >
           <span>
             <span class="block text-xs font-bold uppercase tracking-widest text-slate-400">
               Telefon Po–Pá 9–18
             </span>
-            <span class="mt-0.5 block text-base font-black">
+            <span class="mt-0.5 block text-base font-black text-slate-600">
               {phoneNumber}
             </span>
           </span>
@@ -446,11 +297,11 @@
               <path
                 stroke-linecap="round"
                 stroke-linejoin="round"
-                d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 0 0-1.173.417l-.97 1.293a1.125 1.125 0 0 1-1.21.38 12.035 12.035 0 0 1-7.143-7.143 1.125 1.125 0 0 1 .38-1.21l1.293-.97a1.125 1.125 0 0 0 .417-1.173L6.963 3.102A1.125 1.125 0 0 0 5.872 2.25H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
+                d="M18.364 18.364A9 9 0 0 1 5.636 5.636m12.728 12.728A9 9 0 0 0 5.636 5.636m12.728 12.728L5.636 5.636"
               />
             </svg>
           </span>
-        </a>
+        </div>
 
         <p class="mt-3 text-center text-xs font-medium text-slate-400">
           Bez závazků · rychlá domluva · lidský přístup
