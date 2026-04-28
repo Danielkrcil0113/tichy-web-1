@@ -20,6 +20,7 @@
     note: string | null;
     consent: boolean;
     image_count: number;
+    image_urls?: string[];
     admin_email_sent: boolean;
     customer_email_sent: boolean;
     email_error: string | null;
@@ -143,6 +144,10 @@
                 {STATUS_CONFIG[lead.status]?.label ?? 'Nové'}
               </span>
 
+              <span class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Foto: {lead.image_urls?.length ?? lead.image_count ?? 0}
+              </span>
+
               <button
                 type="button"
                 onclick={() => (expandedLeadId = expandedLeadId === lead.id ? null : lead.id)}
@@ -176,7 +181,7 @@
 
               <div class="rounded-2xl bg-slate-50 p-4">
                 <p class="text-[10px] font-black uppercase text-slate-400">Fotografie</p>
-                <p class="mt-1 font-black">{lead.image_count ?? 0}</p>
+                <p class="mt-1 font-black">{lead.image_urls?.length ?? lead.image_count ?? 0}</p>
                 <p class="text-sm text-slate-500">přiložených souborů</p>
               </div>
 
@@ -190,6 +195,47 @@
                 </p>
               </div>
             </div>
+
+            {#if lead.image_urls?.length}
+              <div class="mt-5 border-t border-slate-100 pt-5" in:fade>
+                <div class="mb-3 flex items-center justify-between gap-3">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    Fotografie
+                  </p>
+
+                  <p class="text-xs font-bold text-slate-400">
+                    Kliknutím otevřeš fotku v nové kartě
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+  {#each lead.image_urls as imageUrl, index (imageUrl)}
+    <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
+    <!-- eslint-disable svelte/no-navigation-without-resolve -->
+<a
+  href={imageUrl}
+  target="_blank"
+  rel="noreferrer"
+  class="group overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm transition hover:shadow-md"
+>
+  <img
+    src={imageUrl}
+    alt={`Fotografie ${index + 1} · ${lead.full_name || 'lead'}`}
+    loading="lazy"
+    class="aspect-square h-full w-full object-cover transition duration-300 group-hover:scale-105"
+  />
+</a>
+<!-- eslint-enable svelte/no-navigation-without-resolve -->
+  {/each}
+</div>
+              </div>
+            {:else}
+              <div class="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center" in:fade>
+                <p class="text-sm font-bold text-slate-400">
+                  U této poptávky nejsou nahrané žádné fotografie.
+                </p>
+              </div>
+            {/if}
           {/if}
         </article>
       {:else}
