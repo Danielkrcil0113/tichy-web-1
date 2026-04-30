@@ -32,7 +32,7 @@
 
   const phoneNumber = '+420 602 447 432';
   const availabilityText = 'Po–Pá 9:00–18:00';
-  const websiteUrl = 'https://www.nejlepsiodhadnemovitosti.cz'; // Změň na svou reálnou doménu
+  const websiteUrl = 'https://www.nejlepsiodhadnemovitosti.cz';
 
   onMount(() => {
     let idleTimer: number | undefined;
@@ -102,33 +102,33 @@
 </script>
 
 <svelte:head>
-  <!-- SEO: Optimalizovaný Title pro Google i Seznam -->
-  <title>Odhad nemovitosti zdarma | Zjistěte tržní cenu | Nejlepší Odhad</title>
+  <!-- SEO: Titulek zaměřený na Prahu a ČR -->
+  <title>Odhad nemovitosti Praha a ČR zdarma | Zjistěte tržní cenu | Nejlepší Odhad</title>
 
-  <!-- SEO: Meta Description (zobrazuje se ve výsledcích vyhledávání jako popisek) -->
-  <meta name="description" content="Chcete znát reálnou cenu svého bytu, domu nebo pozemku? Získejte profesionální odhad tržní ceny nemovitosti zcela zdarma a nezávazně. Zpracujeme i pro dědictví." />
+  <!-- SEO: Meta Description (rozšířený o lokality) -->
+  <meta name="description" content="Chcete znát reálnou cenu svého bytu, domu či pozemku v Praze, Ústí nad Labem nebo kdekoliv v ČR? Získejte profesionální odhad tržní ceny zcela zdarma a nezávazně." />
   
-  <!-- SEO: Klíčová slova (Google je sice ignoruje, ale Seznam k nim stále trochu přihlíží) -->
-  <meta name="keywords" content="odhad nemovitosti, odhad ceny bytu, odhad ceny domu, tržní cena nemovitosti, ocenění nemovitosti zdarma, odhad pro dědictví, kalkulačka ceny nemovitosti" />
+  <!-- SEO: Klíčová slova (včetně lokalit) -->
+  <meta name="keywords" content="odhad nemovitosti praha, odhad ceny bytu praha, odhad ceny domu praha, ocenění nemovitosti ústí nad labem, tržní cena nemovitosti, odhad pro dědictví praha" />
 
-  <!-- Canonical URL (Zabraňuje duplicitám) -->
+  <!-- Canonical URL -->
   <link rel="canonical" href={websiteUrl} />
 
-  <!-- Open Graph tagy pro hezčí sdílení na Facebooku, WhatsAppu apod. -->
+  <!-- Open Graph tagy -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content={websiteUrl} />
-  <meta property="og:title" content="Odhad nemovitosti zdarma a online | Nejlepší Odhad" />
-  <meta property="og:description" content="Získejte přesný odhad tržní ceny vaší nemovitosti zcela zdarma a nezávazně od expertů." />
+  <meta property="og:title" content="Odhad nemovitosti zdarma - Praha, Ústí a celá ČR | Nejlepší Odhad" />
+  <meta property="og:description" content="Získejte přesný odhad tržní ceny vaší nemovitosti zcela zdarma. Experty zpracované ocenění pro prodej i dědictví." />
   <meta property="og:image" content="{websiteUrl}/logo.jpeg" />
 
-  <!-- Strukturovaná data pro vyhledávače -->
+  <!-- Rozšířená Strukturovaná data pro Local SEO -->
   <script type="application/ld+json">
     {@html JSON.stringify({
       "@context": "https://schema.org",
       "@type": "RealEstateAgent",
       "name": "Nejlepší Odhad Nemovitosti",
       "image": `${websiteUrl}/logo.jpeg`,
-      "description": "Získejte přesný a nezávazný odhad tržní ceny vaší nemovitosti (bytu, domu, pozemku) zcela zdarma.",
+      "description": "Získejte přesný a nezávazný odhad tržní ceny vaší nemovitosti (bytu, domu, pozemku) v Praze a severních Čechách zcela zdarma.",
       "url": websiteUrl,
       "telephone": phoneNumber,
       "address": {
@@ -143,70 +143,39 @@
         "latitude": "50.6607",
         "longitude": "14.0322"
       },
-      "areaServed": "CZ",
-      "priceRange": "Zdarma"
+      "areaServed": [
+        { "@type": "City", "name": "Praha" },
+        { "@type": "City", "name": "Ústí nad Labem" },
+        { "@type": "State", "name": "Středočeský kraj" }
+      ],
+      "openingHours": "Mo-Fr 09:00-18:00",
+      "priceRange": "0 CZK"
     })}
   </script>
 
   <style>
     @keyframes sweep {
-      0% {
-        transform: translateX(-100%);
-      }
-
-      100% {
-        transform: translateX(100%);
-      }
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
     }
 
     @keyframes phone-ring {
-      0%,
-      100% {
-        transform: rotate(0deg);
-      }
-
-      10% {
-        transform: rotate(-12deg);
-      }
-
-      20% {
-        transform: rotate(12deg);
-      }
-
-      30% {
-        transform: rotate(-8deg);
-      }
-
-      40% {
-        transform: rotate(8deg);
-      }
-
-      50% {
-        transform: rotate(0deg);
-      }
+      0%, 100% { transform: rotate(0deg); }
+      10% { transform: rotate(-12deg); }
+      20% { transform: rotate(12deg); }
+      30% { transform: rotate(-8deg); }
+      40% { transform: rotate(8deg); }
+      50% { transform: rotate(0deg); }
     }
 
     @keyframes soft-pulse {
-      0%,
-      100% {
-        transform: scale(1);
-        opacity: 0.85;
-      }
-
-      50% {
-        transform: scale(1.25);
-        opacity: 0.35;
-      }
+      0%, 100% { transform: scale(1); opacity: 0.85; }
+      50% { transform: scale(1.25); opacity: 0.35; }
     }
 
     @keyframes shine {
-      0% {
-        transform: translateX(-120%) skewX(-18deg);
-      }
-
-      100% {
-        transform: translateX(220%) skewX(-18deg);
-      }
+      0% { transform: translateX(-120%) skewX(-18deg); }
+      100% { transform: translateX(220%) skewX(-18deg); }
     }
 
     .animate-sweep {
@@ -321,7 +290,7 @@
         </h3>
 
         <p class="mt-3 text-sm leading-6 text-slate-600">
-          Rádi vám pomůžeme s odhadem, výběrem typu nemovitosti i dalším postupem.
+          Rádi vám pomůžeme s odhadem nemovitosti v Praze i regionech.
           Telefonická pomoc je dostupná v pracovní době.
         </p>
 
