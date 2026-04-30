@@ -32,6 +32,7 @@
 
   const phoneNumber = '+420 602 447 432';
   const availabilityText = 'Po–Pá 9:00–18:00';
+  const websiteUrl = 'https://www.nejlepsiodhadnemovitosti.cz'; // Změň na svou reálnou doménu
 
   onMount(() => {
     let idleTimer: number | undefined;
@@ -101,7 +102,51 @@
 </script>
 
 <svelte:head>
-  <title>Nejlepší Odhad | Odhad nemovitosti zdarma</title>
+  <!-- SEO: Optimalizovaný Title pro Google i Seznam -->
+  <title>Odhad nemovitosti zdarma | Zjistěte tržní cenu | Nejlepší Odhad</title>
+
+  <!-- SEO: Meta Description (zobrazuje se ve výsledcích vyhledávání jako popisek) -->
+  <meta name="description" content="Chcete znát reálnou cenu svého bytu, domu nebo pozemku? Získejte profesionální odhad tržní ceny nemovitosti zcela zdarma a nezávazně. Zpracujeme i pro dědictví." />
+  
+  <!-- SEO: Klíčová slova (Google je sice ignoruje, ale Seznam k nim stále trochu přihlíží) -->
+  <meta name="keywords" content="odhad nemovitosti, odhad ceny bytu, odhad ceny domu, tržní cena nemovitosti, ocenění nemovitosti zdarma, odhad pro dědictví, kalkulačka ceny nemovitosti" />
+
+  <!-- Canonical URL (Zabraňuje duplicitám) -->
+  <link rel="canonical" href={websiteUrl} />
+
+  <!-- Open Graph tagy pro hezčí sdílení na Facebooku, WhatsAppu apod. -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content={websiteUrl} />
+  <meta property="og:title" content="Odhad nemovitosti zdarma a online | Nejlepší Odhad" />
+  <meta property="og:description" content="Získejte přesný odhad tržní ceny vaší nemovitosti zcela zdarma a nezávazně od expertů." />
+  <meta property="og:image" content="{websiteUrl}/logo.jpeg" />
+
+  <!-- Strukturovaná data pro vyhledávače -->
+  <script type="application/ld+json">
+    {@html JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "RealEstateAgent",
+      "name": "Nejlepší Odhad Nemovitosti",
+      "image": `${websiteUrl}/logo.jpeg`,
+      "description": "Získejte přesný a nezávazný odhad tržní ceny vaší nemovitosti (bytu, domu, pozemku) zcela zdarma.",
+      "url": websiteUrl,
+      "telephone": phoneNumber,
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Muchova 2888/2",
+        "addressLocality": "Ústí nad Labem",
+        "postalCode": "400 11",
+        "addressCountry": "CZ"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "50.6607",
+        "longitude": "14.0322"
+      },
+      "areaServed": "CZ",
+      "priceRange": "Zdarma"
+    })}
+  </script>
 
   <style>
     @keyframes sweep {
@@ -191,7 +236,7 @@
     <div class="relative flex flex-col items-center px-4">
       <img
         src="/logo.jpeg"
-        alt="Logo"
+        alt="Nejlepší Odhad Nemovitosti - Logo"
         class="h-32 w-auto animate-pulse object-contain drop-shadow-2xl md:h-48"
       />
 
@@ -204,6 +249,7 @@
 
 <div class={`bg-white text-slate-900 ${isLoading ? 'h-screen overflow-hidden' : ''}`}>
   <Navbar />
+  
   <Hero />
 
   <LeadWidget form={form || data.form} />
